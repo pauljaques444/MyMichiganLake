@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MyMichiganLake — Michigan's Premier Lake Community</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a2a4a;--water:#1a6fa8;--sky:#4db8e8;--sand:#f5e6c8;
+  --pine:#2d5a27;--gold:#e8a020;--foam:#e8f4fc;--text:#1a2e3b;--muted:#5a7a8a;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;color:var(--text);background:#fff;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{background:rgba(8,28,50,0.68);backdrop-filter:blur(14px);padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;height:66px;position:fixed;top:0;left:0;right:0;z-index:200;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo{color:#fff;font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:.5rem}
+.logo-wave{color:#7dd8f8;font-style:italic}
+.nav-links{display:flex;gap:1.6rem;list-style:none}
+.nav-links a{color:rgba(255,255,255,.82);text-decoration:none;font-size:.8rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:var(--gold);color:var(--navy);padding:.48rem 1.2rem;border-radius:22px;font-weight:800;font-size:.82rem;text-decoration:none;letter-spacing:.2px;transition:opacity .2s}
+.nav-cta:hover{opacity:.88}
+
+/* ── HERO CAROUSEL ── */
+.hero{position:relative;height:100vh;min-height:600px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 1.6s ease-in-out}
+.slide.active{opacity:1}
+.slide img{width:100%;height:100%;object-fit:cover;object-position:center 42%}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(165deg,rgba(5,18,38,0.72) 0%,rgba(8,38,78,0.5) 38%,rgba(10,52,92,0.22) 68%,rgba(0,18,38,0.65) 100%);z-index:2;pointer-events:none}
+.hero-content{position:relative;z-index:4;text-align:center;padding:2rem;max-width:760px}
+.hero-tag{background:rgba(255,255,255,.13);color:#fff;border:1px solid rgba(255,255,255,.32);padding:.38rem 1.1rem;border-radius:22px;font-size:.74rem;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;display:inline-block;margin-bottom:1.6rem;backdrop-filter:blur(8px)}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.6rem,5.5vw,4.6rem);color:#fff;line-height:1.1;margin-bottom:1.2rem;text-shadow:0 3px 30px rgba(0,0,0,.5)}
+.hero h1 em{color:#7dd8f8;font-style:italic}
+.hero-sub{color:rgba(255,255,255,.88);font-size:1.08rem;line-height:1.75;margin-bottom:2.2rem;text-shadow:0 1px 12px rgba(0,0,0,.45);max-width:580px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-gold{background:var(--gold);color:var(--navy);padding:.78rem 2rem;border-radius:28px;font-weight:800;text-decoration:none;font-size:.95rem;box-shadow:0 5px 22px rgba(0,0,0,.28);transition:transform .2s,opacity .2s}
+.btn-gold:hover{transform:translateY(-2px);opacity:.92}
+.btn-ghost{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.52);padding:.78rem 2rem;border-radius:28px;font-weight:700;text-decoration:none;font-size:.95rem;backdrop-filter:blur(8px);transition:background .2s}
+.btn-ghost:hover{background:rgba(255,255,255,.26)}
+.carousel-dots{position:absolute;bottom:148px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:.6rem}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.38);border:1.5px solid rgba(255,255,255,.55);cursor:pointer;transition:background .3s,transform .3s}
+.dot.active{background:#fff;transform:scale(1.3)}
+.carousel-arrows{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:100%;display:flex;justify-content:space-between;padding:0 1.2rem;pointer-events:none}
+.arrow{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.38);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);pointer-events:all;transition:background .2s;line-height:1}
+.arrow:hover{background:rgba(255,255,255,.3)}
+.lake-caption{position:absolute;bottom:152px;right:1.4rem;z-index:5;background:rgba(0,0,0,.42);color:rgba(255,255,255,.88);font-size:.72rem;padding:.3rem .85rem;border-radius:22px;backdrop-filter:blur(8px);font-weight:700;letter-spacing:.3px}
+.progress-bar{position:absolute;bottom:0;left:0;height:3px;background:var(--gold);z-index:5;width:0}
+.hero-waves{position:absolute;bottom:0;left:0;right:0;height:140px;pointer-events:none;z-index:3}
+
+/* ── LAKE FINDER BAR ── */
+.lake-finder{background:var(--foam);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap;border-bottom:3px solid var(--water)}
+.lake-finder label{font-weight:800;color:var(--navy);font-size:.92rem}
+.lake-select{padding:.6rem 1.2rem;border:2px solid var(--water);border-radius:8px;font-size:.88rem;font-family:'Nunito',sans-serif;color:var(--navy);background:#fff;cursor:pointer;min-width:230px}
+.btn-find{background:var(--water);color:#fff;padding:.62rem 1.5rem;border:none;border-radius:8px;font-weight:800;font-size:.88rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:background .2s}
+.btn-find:hover{background:var(--navy)}
+
+/* ── SECTIONS ── */
+section{padding:4rem 2rem}
+.inner{max-width:1120px;margin:0 auto}
+.sec-head{text-align:center;margin-bottom:2.8rem}
+.sec-head h2{font-family:'Playfair Display',serif;font-size:2.1rem;color:var(--navy);margin-bottom:.55rem}
+.sec-head p{color:var(--muted);font-size:.95rem;max-width:540px;margin:0 auto;line-height:1.7}
+.section-alt{background:var(--foam)}
+.divider{height:3px;background:linear-gradient(90deg,transparent,var(--water),transparent)}
+
+/* ── FEATURE CARDS ── */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.3rem}
+.feat-card{background:#fff;border:1px solid #d8eaf5;border-radius:16px;padding:1.5rem;transition:transform .2s,box-shadow .2s}
+.feat-card:hover{transform:translateY(-4px);box-shadow:0 10px 32px rgba(26,111,168,.13)}
+.card-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem}
+.ic-b{background:#e4f2fb}.ic-g{background:#e6f5e6}.ic-y{background:#fdf8e1}.ic-c{background:#fdf0ed}
+.feat-card h3{font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:.4rem}
+.feat-card p{font-size:.84rem;color:var(--muted);line-height:1.65}
+
+/* ── MEMBER PROFILE ── */
+.profile-wrap{background:linear-gradient(135deg,var(--foam) 0%,#fff 100%);border-radius:22px;padding:2.5rem;border:1px solid #cce0ef}
+.profile-layout{display:grid;grid-template-columns:210px 1fr;gap:2.2rem;align-items:start}
+.p-avatar{text-align:center}
+.avatar-ring{width:112px;height:112px;border-radius:50%;background:linear-gradient(135deg,var(--water),var(--sky));margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:2.3rem;color:#fff;font-weight:700;font-family:'Playfair Display',serif;box-shadow:0 4px 18px rgba(26,111,168,.3)}
+.verified{display:inline-flex;align-items:center;gap:.3rem;background:#e6f9ec;color:#1e7a3a;padding:.3rem .9rem;border-radius:22px;font-size:.76rem;font-weight:800;border:1px solid #b8e8c8}
+.p-info h3{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--navy);margin-bottom:.2rem}
+.p-sub{color:var(--muted);font-size:.86rem;margin-bottom:1rem}
+.tags{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.tag{background:var(--foam);border:1px solid #cce0ef;padding:.26rem .75rem;border-radius:22px;font-size:.76rem;color:var(--water);font-weight:700}
+.p-fields{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;margin-top:1rem}
+.pf{background:#fff;border:1px solid #d8eaf5;border-radius:11px;padding:.8rem 1rem}
+.pf label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:.22rem;font-weight:800}
+.pf-val{font-size:.86rem;color:var(--navy);font-weight:700}
+.toys-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:1rem;margin-top:1.4rem}
+.toy{border:1px solid #d8eaf5;border-radius:14px;overflow:hidden}
+.toy-img{height:90px;display:flex;align-items:center;justify-content:center;font-size:2.2rem}
+.toy-body{padding:.55rem .85rem .65rem}
+.toy-body strong{font-size:.82rem;color:var(--navy);display:block}
+.toy-body span{font-size:.74rem;color:var(--muted)}
+.li-btn{display:block;background:var(--water);color:#fff;padding:.38rem .75rem;border-radius:7px;font-size:.76rem;font-weight:800;text-decoration:none;text-align:center;margin-top:.9rem}
+
+/* ── MAP + WEATHER ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:2.2rem;align-items:start}
+.map-box{background:linear-gradient(160deg,#c0dce8,#a0c4d8);border-radius:16px;height:290px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;border:1px solid #b8d4e4}
+.map-pin{position:absolute;width:10px;height:10px;background:var(--water);border-radius:50%;border:2px solid #fff;box-shadow:0 0 6px rgba(26,111,168,.5)}
+.map-label{z-index:1;background:rgba(255,255,255,.88);padding:.5rem 1.1rem;border-radius:22px;font-size:.9rem;font-weight:800;color:var(--navy)}
+.map-sub{font-size:.74rem;color:var(--navy);margin-top:.4rem;background:rgba(255,255,255,.72);padding:.28rem .85rem;border-radius:12px}
+.lake-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem;margin-top:.9rem}
+.lstat{background:var(--foam);border-radius:9px;padding:.6rem;text-align:center;font-size:.76rem;color:var(--muted)}
+.lstat strong{display:block;font-size:1rem;color:var(--navy);font-weight:800}
+.wx-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.wx-card{background:#fff;border:1px solid #d8eaf5;border-radius:13px;padding:1.1rem;text-align:center}
+.wx-icon{font-size:2rem;margin-bottom:.4rem}
+.wx-val{font-size:1.55rem;font-weight:800;color:var(--navy);font-family:'Playfair Display',serif}
+.wx-lbl{font-size:.73rem;color:var(--muted);margin-top:.15rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.wx-status{margin-top:.9rem;background:#e6f9ec;border-radius:11px;padding:.85rem 1rem;border-left:4px solid #2d7a2d}
+.wx-status strong{font-size:.8rem;color:#1e5a28;display:block;margin-bottom:.2rem}
+.wx-status span{font-size:.76rem;color:#3a7a4a}
+
+/* ── EVENTS / TABS ── */
+.tabs{display:flex;gap:.5rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.tab{padding:.46rem 1.1rem;border-radius:22px;font-size:.82rem;font-weight:800;cursor:pointer;border:1.5px solid #d8eaf5;color:var(--muted);background:#fff;font-family:'Nunito',sans-serif;transition:all .2s}
+.tab.active{background:var(--water);border-color:var(--water);color:#fff}
+.events-list{display:grid;gap:1rem}
+.ev-item{background:#fff;border:1px solid #d8eaf5;border-radius:13px;padding:1.1rem 1.4rem;display:flex;align-items:center;gap:1.2rem;transition:box-shadow .2s}
+.ev-item:hover{box-shadow:0 4px 18px rgba(26,111,168,.1)}
+.ev-date{background:var(--water);color:#fff;border-radius:11px;padding:.5rem .75rem;text-align:center;min-width:52px;flex-shrink:0}
+.ev-day{font-size:1.3rem;font-weight:800;line-height:1}
+.ev-mo{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px}
+.ev-info h4{font-size:.93rem;font-weight:800;color:var(--navy);margin-bottom:.2rem}
+.ev-info p{font-size:.79rem;color:var(--muted)}
+.ev-type{margin-left:auto;padding:.26rem .75rem;border-radius:22px;font-size:.74rem;font-weight:800;white-space:nowrap;flex-shrink:0}
+.t-soc{background:#e6f9ec;color:#1e7a3a}.t-sale{background:#fdf8e1;color:#8a6000}.t-mkt{background:#fdf0ed;color:#a03020}.t-reg{background:#e8f0fc;color:#1a3a8a}
+
+/* ── MARKETPLACE ── */
+.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.2rem}
+.mcard{background:#fff;border:1px solid #d8eaf5;border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer}
+.mcard:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(26,111,168,.13)}
+.mcard-img{height:115px;display:flex;align-items:center;justify-content:center;font-size:2.8rem}
+.mcard-body{padding:.9rem 1rem 1rem}
+.mcard-body h4{font-size:.88rem;font-weight:800;color:var(--navy);margin-bottom:.28rem}
+.mcard-body p{font-size:.77rem;color:var(--muted);line-height:1.5}
+.mcard-price{font-size:.98rem;font-weight:800;color:var(--water);margin-top:.5rem}
+.mcard-seller{font-size:.72rem;color:var(--muted);margin-top:.25rem}
+.img-b1{background:linear-gradient(135deg,#0a2a4a,#1a6fa8)}
+.img-b2{background:linear-gradient(135deg,#0e1f40,#2968a8)}
+.img-g1{background:linear-gradient(135deg,#1a4a1a,#2d7a2d)}
+.img-g2{background:linear-gradient(135deg,#0e3a1a,#1e6a2a)}
+.img-y1{background:linear-gradient(135deg,#5a3a08,#c8840a)}
+.img-p1{background:linear-gradient(135deg,#3a0a4a,#8a30b8)}
+
+/* ── ADVERTISERS ── */
+.adv-section{background:var(--navy);padding:3.5rem 2rem}
+.adv-inner{max-width:1120px;margin:0 auto}
+.adv-head{text-align:center;margin-bottom:2.2rem}
+.adv-head h2{font-family:'Playfair Display',serif;font-size:1.9rem;color:#fff;margin-bottom:.5rem}
+.adv-head p{color:rgba(255,255,255,.6);font-size:.9rem}
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem}
+.adv-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:1.3rem 1rem;text-align:center;transition:background .2s,transform .2s;cursor:pointer}
+.adv-card:hover{background:rgba(255,255,255,.16);transform:translateY(-2px)}
+.adv-icon{font-size:2.1rem;margin-bottom:.65rem}
+.adv-name{font-size:.86rem;font-weight:800;color:#fff;margin-bottom:.18rem}
+.adv-type{font-size:.74rem;color:rgba(255,255,255,.48)}
+.adv-badge{display:inline-block;margin-top:.55rem;padding:.22rem .65rem;border-radius:12px;font-size:.7rem;font-weight:800}
+.b-feat{background:var(--gold);color:var(--navy)}
+.b-ver{background:rgba(255,255,255,.15);color:rgba(255,255,255,.8)}
+.adv-cta{text-align:center;margin-top:2rem}
+.adv-cta a{background:var(--gold);color:var(--navy);padding:.72rem 2rem;border-radius:28px;font-weight:800;font-size:.92rem;text-decoration:none;display:inline-block;transition:opacity .2s}
+.adv-cta a:hover{opacity:.88}
+
+/* ── SIGNUP ── */
+.signup{background:linear-gradient(135deg,var(--water),var(--sky));padding:3.5rem 2rem;text-align:center}
+.signup h2{font-family:'Playfair Display',serif;font-size:2rem;color:#fff;margin-bottom:.6rem}
+.signup p{color:rgba(255,255,255,.85);font-size:.95rem;margin-bottom:1.6rem}
+.signup-row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;max-width:520px;margin:0 auto}
+.signup-row input{padding:.72rem 1.3rem;border:none;border-radius:9px;font-size:.9rem;font-family:'Nunito',sans-serif;min-width:220px;flex:1;outline:none}
+.signup-row button{background:var(--navy);color:#fff;border:none;padding:.72rem 1.6rem;border-radius:9px;font-weight:800;font-size:.9rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:opacity .2s}
+.signup-row button:hover{opacity:.85}
+.signup-note{margin-top:1rem;font-size:.76rem;color:rgba(255,255,255,.65)}
+
+/* ── FOOTER ── */
+footer{background:#061828;padding:2.5rem 2rem;color:rgba(255,255,255,.5)}
+.footer-inner{max-width:1120px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem;margin-bottom:2rem}
+.footer-brand .logo{font-size:1.3rem;margin-bottom:.8rem;display:inline-flex}
+.footer-brand p{font-size:.82rem;line-height:1.7;color:rgba(255,255,255,.45);max-width:240px}
+.footer-col h4{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.7);margin-bottom:.8rem}
+.footer-col a{display:block;color:rgba(255,255,255,.4);text-decoration:none;font-size:.82rem;margin-bottom:.4rem;transition:color .2s}
+.footer-col a:hover{color:rgba(255,255,255,.8)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:1.2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+.footer-bottom p{font-size:.76rem}
+.footer-links{display:flex;gap:1.2rem}
+.footer-links a{color:rgba(255,255,255,.35);text-decoration:none;font-size:.76rem;transition:color .2s}
+.footer-links a:hover{color:rgba(255,255,255,.7)}
+
+/* ── SECTION LABEL ── */
+.sec-label{display:inline-block;background:var(--foam);color:var(--water);border:1px solid #cce0ef;padding:.28rem .85rem;border-radius:22px;font-size:.72rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:.75rem}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <a href="#" class="logo">🌊 My<span class="logo-wave">Michigan</span>Lake</a>
+  <ul class="nav-links">
+    <li><a href="#finder">Find a Lake</a></li>
+    <li><a href="#members">Members</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#marketplace">Marketplace</a></li>
+    <li><a href="#businesses">Businesses</a></li>
+  </ul>
+  <a href="#signup" class="nav-cta">Join Now</a>
+</nav>
+
+<!-- ══ HERO CAROUSEL ══ -->
+<div class="hero" id="hero">
+  <div class="slide active"><img src="https://simplemost.com/wp-content/uploads/2017/06/torch-lake-michigan.jpg" alt="Torch Lake Michigan" onerror="this.parentElement.style.background='linear-gradient(160deg,#062040,#1a6fa8)'"/></div>
+  <div class="slide"><img src="https://visithigginslake.com/wp-content/uploads/2020/06/higgins-lake-aerial.jpg" alt="Higgins Lake Michigan" onerror="this.parentElement.style.background='linear-gradient(160deg,#0a3050,#2980b9)'"/></div>
+  <div class="slide"><img src="https://lakeofmichigan.com/wp-content/uploads/2020/08/Elk-Lake-Michigan-Aerial.jpg" alt="Elk Lake Michigan" onerror="this.parentElement.style.background='linear-gradient(160deg,#062840,#1a7a98)'"/></div>
+  <div class="slide"><img src="https://lakeofmichigan.com/wp-content/uploads/2020/07/Gull-Lake-Michigan-Aerial.jpg" alt="Gull Lake Michigan" onerror="this.parentElement.style.background='linear-gradient(160deg,#083050,#1560a8)'"/></div>
+  <div class="slide"><img src="https://visitlakestclair.com/wp-content/uploads/2019/06/lake-st-clair-aerial.jpg" alt="Lake St Clair Michigan" onerror="this.parentElement.style.background='linear-gradient(160deg,#0a2848,#0e5898)'"/></div>
+
+  <div class="hero-overlay"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">✦ Michigan's Premier Lake Community</div>
+    <h1>Life is Better<br>on a <em>Michigan Lake</em></h1>
+    <p class="hero-sub">Connect with fellow lake property owners, discover local events, explore the marketplace, and celebrate everything that makes Michigan's 11,000+ lakes extraordinary.</p>
+    <div class="hero-btns">
+      <a href="#signup" class="btn-gold">🏡 Join as Verified Owner</a>
+      <a href="#finder" class="btn-ghost">Explore the Lakes</a>
+    </div>
+  </div>
+
+  <div class="lake-caption">📍 <span id="caption-text">Torch Lake, Antrim County</span></div>
+
+  <div class="carousel-dots" id="dots">
+    <div class="dot active" onclick="goTo(0)"></div>
+    <div class="dot" onclick="goTo(1)"></div>
+    <div class="dot" onclick="goTo(2)"></div>
+    <div class="dot" onclick="goTo(3)"></div>
+    <div class="dot" onclick="goTo(4)"></div>
+  </div>
+
+  <div class="carousel-arrows">
+    <button class="arrow" onclick="prev()">&#8249;</button>
+    <button class="arrow" onclick="next()">&#8250;</button>
+  </div>
+
+  <div class="progress-bar" id="progress"></div>
+
+  <svg class="hero-waves" viewBox="0 0 1200 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0,75 C200,18 400,132 600,75 C800,18 1000,132 1200,75 L1200,140 L0,140 Z" fill="rgba(232,244,252,0.16)"/>
+    <path d="M0,92 C260,52 520,135 780,92 C940,68 1090,120 1200,98 L1200,140 L0,140 Z" fill="rgba(232,244,252,0.1)"/>
+    <path d="M0,112 C300,85 600,138 900,108 C1060,92 1155,126 1200,116 L1200,140 L0,140 Z" fill="#fff"/>
+  </svg>
+</div>
+
+<!-- ══ LAKE FINDER ══ -->
+<div class="lake-finder" id="finder">
+  <label>🗺️ Find Your Lake:</label>
+  <select class="lake-select" id="lakeSelect">
+    <option value="">— Select a Michigan Lake —</option>
+    <optgroup label="Upper Peninsula">
+      <option>Lake Gogebic</option><option>Tahquamenon Lake</option><option>Muskallonge Lake</option><option>Lake Michigamme</option>
+    </optgroup>
+    <optgroup label="Northern Lower Peninsula">
+      <option>Torch Lake</option><option>Elk Lake</option><option>Burt Lake</option><option>Mullett Lake</option>
+      <option>Higgins Lake</option><option>Houghton Lake</option><option>Crystal Lake</option><option>Walloon Lake</option>
+    </optgroup>
+    <optgroup label="West Michigan">
+      <option>Gull Lake</option><option>Gun Lake</option><option>Hamlin Lake</option><option>Muskegon Lake</option>
+    </optgroup>
+    <optgroup label="Southeast Michigan">
+      <option>Lake St. Clair</option><option>Walled Lake</option><option>Orchard Lake</option><option>Cass Lake</option><option>Pontiac Lake</option>
+    </optgroup>
+    <optgroup label="Southwest Michigan">
+      <option>Paw Paw Lake</option><option>Sister Lakes</option><option>Clear Lake</option><option>Lake Loveless</option>
+    </optgroup>
+  </select>
+  <button class="btn-find" onclick="findLake()">View Lake Page →</button>
+</div>
+
+<!-- ══ FEATURES ══ -->
+<section>
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-label">Platform Features</div>
+      <h2>Everything You Need for Lake Life</h2>
+      <p>Your all-in-one community hub — verified members, live conditions, local events, and a thriving marketplace</p>
+    </div>
+    <div class="card-grid">
+      <div class="feat-card"><div class="card-icon ic-b">👤</div><h3>Verified Owner Profiles</h3><p>Share your career, education, sports teams, LinkedIn, and connect with neighbors on your lake.</p></div>
+      <div class="feat-card"><div class="card-icon ic-y">⛵</div><h3>Boats & Lake Toys</h3><p>Show off your fleet — pontoons, ski boats, jet skis, kayaks — with photos and full specs.</p></div>
+      <div class="feat-card"><div class="card-icon ic-b">🗺️</div><h3>Interactive Lake Maps</h3><p>Depth charts, boat launches, swim areas, and local points of interest for every Michigan lake.</p></div>
+      <div class="feat-card"><div class="card-icon ic-g">🌤️</div><h3>Live Weather & Water</h3><p>Real-time conditions: air temp, water temp, wave height, wind speed, visibility, and UV index.</p></div>
+      <div class="feat-card"><div class="card-icon ic-c">📅</div><h3>Events & Activities</h3><p>Community fish fries, regattas, fireworks, holiday gatherings, and neighborhood announcements.</p></div>
+      <div class="feat-card"><div class="card-icon ic-y">🛒</div><h3>Local Marketplace</h3><p>Buy, sell, or trade lake gear, boats, and cottages — and shop from trusted local businesses.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ MEMBER PROFILE ══ -->
+<section class="section-alt" id="members">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-label">Member Profiles</div>
+      <h2>Your Lake Life Story</h2>
+      <p>Verified property owners share their full story — family, career, boats, and everything in between</p>
+    </div>
+    <div class="profile-wrap">
+      <div class="profile-layout">
+        <div class="p-avatar">
+          <div class="avatar-ring">JM</div>
+          <div class="verified">✓ Verified Owner</div>
+          <p style="margin-top:.9rem;font-size:.78rem;color:var(--muted);line-height:1.6">Torch Lake, MI<br>Member since 2022</p>
+          <a href="#" class="li-btn">🔗 LinkedIn Profile</a>
+          <a href="#" style="display:block;background:var(--foam);color:var(--water);border:1px solid #cce0ef;padding:.38rem .75rem;border-radius:7px;font-size:.76rem;font-weight:800;text-decoration:none;text-align:center;margin-top:.5rem">✉️ Message</a>
+        </div>
+        <div class="p-info">
+          <h3>James &amp; Karen Mitchell</h3>
+          <div class="p-sub">Torch Lake, Antrim County &nbsp;·&nbsp; Cottage: "The Blue Horizon"</div>
+          <div class="tags">
+            <span class="tag">⚾ Tigers Fan</span>
+            <span class="tag">🏈 Lions Fan</span>
+            <span class="tag">🏒 Red Wings Fan</span>
+            <span class="tag">⛵ Boater</span>
+            <span class="tag">🎣 Angler</span>
+          </div>
+          <div class="p-fields">
+            <div class="pf"><label>Career</label><div class="pf-val">Retired — Ford Motor Co., VP Engineering (32 yrs)</div></div>
+            <div class="pf"><label>Education</label><div class="pf-val">University of Michigan, B.S. Mech. Engineering '88</div></div>
+            <div class="pf"><label>Kids' Schools</label><div class="pf-val">Elk Rapids High School &nbsp;·&nbsp; MSU Class of '26</div></div>
+            <div class="pf"><label>Years on the Lake</label><div class="pf-val">18 summers at Torch Lake</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1.6rem">
+        <div style="font-size:.78rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.9px;margin-bottom:.85rem">🚤 Boats &amp; Lake Toys</div>
+        <div class="toys-row">
+          <div class="toy"><div class="toy-img img-b1">⛵</div><div class="toy-body"><strong>2021 Mastercraft X24</strong><span>Wakeboard / Ski Boat</span></div></div>
+          <div class="toy"><div class="toy-img img-g1">🚤</div><div class="toy-body"><strong>2019 Bennington 25 QSB</strong><span>Pontoon — 115hp Yamaha</span></div></div>
+          <div class="toy"><div class="toy-img img-y1">🛥️</div><div class="toy-body"><strong>Sea-Doo Spark Trio</strong><span>3-up Jet Ski (×2)</span></div></div>
+          <div class="toy"><div class="toy-img img-p1">🛶</div><div class="toy-body"><strong>Pelican Catch 130</strong><span>Kayak (×3) + Paddleboards</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ MAP + WEATHER ══ -->
+<section>
+  <div class="inner">
+    <div class="two-col">
+      <div>
+        <div class="sec-label" style="margin-bottom:.8rem">Lake Map</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--navy);margin-bottom:1.1rem">🗺️ Torch Lake</h2>
+        <div class="map-box">
+          <div class="map-pin" style="top:28%;left:38%"></div>
+          <div class="map-pin" style="top:52%;left:22%"></div>
+          <div class="map-pin" style="top:44%;left:62%"></div>
+          <div class="map-pin" style="top:68%;left:47%"></div>
+          <div class="map-pin" style="top:22%;left:58%"></div>
+          <div class="map-pin" style="top:60%;left:30%"></div>
+          <div class="map-label">📍 Interactive Lake Map</div>
+          <div class="map-sub">Depth · Launches · Members · Points of Interest</div>
+        </div>
+        <div class="lake-stats">
+          <div class="lstat"><strong>18 mi</strong>Length</div>
+          <div class="lstat"><strong>120 ft</strong>Max Depth</div>
+          <div class="lstat"><strong>247</strong>Members</div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-label" style="margin-bottom:.8rem">Conditions</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--navy);margin-bottom:1.1rem">🌤️ Live Conditions</h2>
+        <div class="wx-grid">
+          <div class="wx-card"><div class="wx-icon">🌤️</div><div class="wx-val">74°F</div><div class="wx-lbl">Air Temp</div></div>
+          <div class="wx-card"><div class="wx-icon">🌊</div><div class="wx-val">68°F</div><div class="wx-lbl">Water Temp</div></div>
+          <div class="wx-card"><div class="wx-icon">💨</div><div class="wx-val">8 mph</div><div class="wx-lbl">Wind SW</div></div>
+          <div class="wx-card"><div class="wx-icon">☀️</div><div class="wx-val">UV 6</div><div class="wx-lbl">UV Index</div></div>
+        </div>
+        <div class="wx-status">
+          <strong>✅ Great Day to Be on the Water!</strong>
+          <span>Calm conditions, clear skies. Water quality: Excellent. No swim advisories in effect.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ EVENTS ══ -->
+<section class="section-alt" id="events">
+  <div class="inner">
+    <div class="sec-head">
+      <div class="sec-label">What's Happening</div>
+      <h2>Events &amp; Marketplace</h2>
+      <p>Discover what's on around your lake — community gatherings, garage sales, and local listings</p>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this,'events-panel')">📅 Upcoming Events</button>
+      <button class="tab" onclick="switchTab(this,'sales-panel')">🏷️ Garage Sales</button>
+      <button class="tab" onclick="switchTab(this,'market-panel')">🛒 For Sale</button>
+      <button class="tab" onclick="switchTab(this,'rental-panel')">🏡 Rentals</button>
+    </div>
+    <div id="events-panel">
+      <div class="events-list">
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">14</div><div class="ev-mo">Jun</div></div><div class="ev-info"><h4>Torch Lake Regatta &amp; Boat Parade</h4><p>Annual summer parade — all vessels welcome. Prizes for best decorated!</p></div><span class="ev-type t-soc">Community</span></div>
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">21</div><div class="ev-mo">Jun</div></div><div class="ev-info"><h4>Multi-Family Garage Sale — South Shore</h4><p>12 families on Lakeshore Dr. — lake gear, furniture, kids toys, antiques.</p></div><span class="ev-type t-sale">Garage Sale</span></div>
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">4</div><div class="ev-mo">Jul</div></div><div class="ev-info"><h4>4th of July Fireworks &amp; Fish Fry</h4><p>Hosted by Torch Lake Association. Watch from the water or the community beach.</p></div><span class="ev-type t-soc">Holiday</span></div>
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">19</div><div class="ev-mo">Jul</div></div><div class="ev-info"><h4>Annual Fishing Tournament</h4><p>Register by July 10. Bass, walleye, and pike categories. Prizes up to $2,000.</p></div><span class="ev-type t-reg">Tournament</span></div>
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">2</div><div class="ev-mo">Aug</div></div><div class="ev-info"><h4>Lake Association Annual Meeting</h4><p>Town hall, water quality report, dock regulations update, and community vote.</p></div><span class="ev-type t-soc">Meeting</span></div>
+      </div>
+    </div>
+    <div id="sales-panel" style="display:none">
+      <div class="events-list">
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">21</div><div class="ev-mo">Jun</div></div><div class="ev-info"><h4>South Shore Multi-Family Sale — 12 Families</h4><p>Lakeshore Dr. — lake gear, furniture, kids toys, vintage finds. 8am–3pm.</p></div><span class="ev-type t-sale">Garage Sale</span></div>
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">28</div><div class="ev-mo">Jun</div></div><div class="ev-info"><h4>The Kowalski Estate Sale — 45 Oak Point Rd</h4><p>Full household, boat equipment, tools, antiques. 9am–2pm both days.</p></div><span class="ev-type t-sale">Estate Sale</span></div>
+        <div class="ev-item"><div class="ev-date"><div class="ev-day">12</div><div class="ev-mo">Jul</div></div><div class="ev-info"><h4>North End Neighborhood Sale — 8 Families</h4><p>Cedar Bay area. Kids gear, water sports equipment, furniture, kitchen items.</p></div><span class="ev-type t-sale">Garage Sale</span></div>
+      </div>
+    </div>
+    <div id="market-panel" style="display:none">
+      <div class="market-grid" id="marketplace">
+        <div class="mcard"><div class="mcard-img img-b1">⛵</div><div class="mcard-body"><h4>2018 Lund 1775 Crossover</h4><p>90HP Mercury, trailer included, excellent condition, low hours.</p><div class="mcard-price">$18,500</div><div class="mcard-seller">Posted by: Tom R. · Torch Lake</div></div></div>
+        <div class="mcard"><div class="mcard-img img-y1">🛥️</div><div class="mcard-body"><h4>Sea-Doo Spark 2up 2020</h4><p>Low hours, cover included, ready for the season. Trailer available.</p><div class="mcard-price">$8,200</div><div class="mcard-seller">Posted by: Mark S. · Higgins Lake</div></div></div>
+        <div class="mcard"><div class="mcard-img img-g2">🎣</div><div class="mcard-body"><h4>Full Fishing Gear Lot</h4><p>Rods, reels, tackle boxes, downriggers, fish finder. All must go.</p><div class="mcard-price">$650 OBO</div><div class="mcard-seller">Posted by: Dave K. · Gull Lake</div></div></div>
+        <div class="mcard"><div class="mcard-img img-b2">⚓</div><div class="mcard-body"><h4>Aluminum Dock System — 80 ft</h4><p>Roll-in style, 8 sections, hardware included. One season old.</p><div class="mcard-price">$2,400</div><div class="mcard-seller">Posted by: Linda P. · Elk Lake</div></div></div>
+        <div class="mcard"><div class="mcard-img img-p1">🏄</div><div class="mcard-body"><h4>4× iRocker All-Around SUP</h4><p>Inflatable paddleboards, pumps and leashes included. Like new.</p><div class="mcard-price">$900 for set</div><div class="mcard-seller">Posted by: Jenny W. · Burt Lake</div></div></div>
+        <div class="mcard"><div class="mcard-img img-g1">🏕️</div><div class="mcard-body"><h4>Boat Lift — 4,000 lb Capacity</h4><p>Jet Dock system, excellent shape. Pick-up only at Torch Lake.</p><div class="mcard-price">$3,100</div><div class="mcard-seller">Posted by: Chuck M. · Torch Lake</div></div></div>
+      </div>
+    </div>
+    <div id="rental-panel" style="display:none">
+      <div class="market-grid">
+        <div class="mcard"><div class="mcard-img img-b1">🏡</div><div class="mcard-body"><h4>Lakefront Cottage — 3BR</h4><p>Private dock, fire pit, sleeps 8. Torch Lake. Available Jul–Aug.</p><div class="mcard-price">$350/night</div><div class="mcard-seller">Posted by: Mitchell Family</div></div></div>
+        <div class="mcard"><div class="mcard-img img-g1">🏡</div><div class="mcard-body"><h4>Higgins Lake Cabin — 2BR</h4><p>Sandy beach, kayaks included, pet friendly. June weekends available.</p><div class="mcard-price">$220/night</div><div class="mcard-seller">Posted by: Anderson Family</div></div></div>
+        <div class="mcard"><div class="mcard-img img-y1">🏡</div><div class="mcard-body"><h4>Gull Lake Guest House — 4BR</h4><p>Deep water dock, boat slip, full kitchen. Sleeps 10.</p><div class="mcard-price">$495/night</div><div class="mcard-seller">Posted by: Peters Family</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══ ADVERTISERS ══ -->
+<div class="adv-section" id="businesses">
+  <div class="adv-inner">
+    <div class="adv-head">
+      <h2>Local Businesses &amp; Partners</h2>
+      <p>Trusted advertisers serving Michigan lake communities — marinas, restaurants, services &amp; more</p>
+    </div>
+    <div class="adv-grid">
+      <div class="adv-card"><div class="adv-icon">⚓</div><div class="adv-name">Torch Lake Marina</div><div class="adv-type">Marina &amp; Boat Launch</div><div class="adv-badge b-feat">Featured</div></div>
+      <div class="adv-card"><div class="adv-icon">🔧</div><div class="adv-name">North Star Boat Repair</div><div class="adv-type">Marine Service</div><div class="adv-badge b-ver">Verified</div></div>
+      <div class="adv-card"><div class="adv-icon">🌿</div><div class="adv-name">Lakeview Landscaping</div><div class="adv-type">Lawn &amp; Dock Services</div><div class="adv-badge b-ver">Verified</div></div>
+      <div class="adv-card"><div class="adv-icon">🍕</div><div class="adv-name">The Dockside Grille</div><div class="adv-type">Restaurant &amp; Bar</div><div class="adv-badge b-feat">Featured</div></div>
+      <div class="adv-card"><div class="adv-icon">🍦</div><div class="adv-name">Shorebird Ice Cream</div><div class="adv-type">Ice Cream &amp; Treats</div><div class="adv-badge b-ver">Verified</div></div>
+      <div class="adv-card"><div class="adv-icon">🏠</div><div class="adv-name">Lake Life Realty</div><div class="adv-type">Real Estate</div><div class="adv-badge b-feat">Featured</div></div>
+      <div class="adv-card"><div class="adv-icon">⚡</div><div class="adv-name">Shoreline Electric</div><div class="adv-type">Electrical Contractor</div><div class="adv-badge b-ver">Verified</div></div>
+      <div class="adv-card"><div class="adv-icon">🎣</div><div class="adv-name">Reel Michigan Guide Co.</div><div class="adv-type">Fishing Charters</div><div class="adv-badge b-ver">Verified</div></div>
+      <div class="adv-card"><div class="adv-icon">🏗️</div><div class="adv-name">Great Lakes Dock Co.</div><div class="adv-type">Dock Installation</div><div class="adv-badge b-feat">Featured</div></div>
+      <div class="adv-card"><div class="adv-icon">🛒</div><div class="adv-name">Northern Ace Hardware</div><div class="adv-type">Hardware &amp; Supply</div><div class="adv-badge b-ver">Verified</div></div>
+      <div class="adv-card"><div class="adv-icon">🧹</div><div class="adv-name">Pure Michigan Clean</div><div class="adv-type">Cleaning Services</div><div class="adv-badge b-ver">Verified</div></div>
+      <div class="adv-card"><div class="adv-icon">🍺</div><div class="adv-name">Lakeside Brewing Co.</div><div class="adv-type">Brewery &amp; Taproom</div><div class="adv-badge b-feat">Featured</div></div>
+    </div>
+    <div class="adv-cta"><a href="#signup">Advertise Your Business →</a></div>
+  </div>
+</div>
+
+<!-- ══ SIGNUP ══ -->
+<div class="signup" id="signup">
+  <h2>Ready to Join the Community?</h2>
+  <p>Verified lake property owners only — connect with your neighbors, list your boats, discover local events.</p>
+  <div class="signup-row">
+    <input type="email" placeholder="Your email address"/>
+    <button type="button">Get Started →</button>
+  </div>
+  <div class="signup-note">Property verification required &nbsp;·&nbsp; Free to join &nbsp;·&nbsp; No spam, ever</div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo">🌊 My<span class="logo-wave">Michigan</span>Lake</a>
+        <p>Michigan's premier online community for lake property owners — celebrating 11,000+ lakes and the people who love them.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="#finder">Find a Lake</a>
+        <a href="#members">Member Profiles</a>
+        <a href="#events">Events</a>
+        <a href="#marketplace">Marketplace</a>
+      </div>
+      <div class="footer-col">
+        <h4>Community</h4>
+        <a href="#">Join as Owner</a>
+        <a href="#">Lake Associations</a>
+        <a href="#">Water Conditions</a>
+        <a href="#">News &amp; Updates</a>
+      </div>
+      <div class="footer-col">
+        <h4>Business</h4>
+        <a href="#">Advertise</a>
+        <a href="#">Business Directory</a>
+        <a href="#">Sponsorships</a>
+        <a href="#">Contact Us</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 MyMichiganLake · Built for Lake People, by Lake People</p>
+      <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Accessibility</a>
+        <a href="#">Sitemap</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── CAROUSEL ──
+const lakes=[
+  {name:"Torch Lake, Antrim County"},
+  {name:"Higgins Lake, Roscommon County"},
+  {name:"Elk Lake, Antrim County"},
+  {name:"Gull Lake, Kalamazoo County"},
+  {name:"Lake St. Clair, Macomb County"}
+];
+let current=0,autoTimer,DUR=5500;
+function goTo(idx){
+  document.getElementById('slide-'+current).classList.remove('active');
+  document.querySelectorAll('.dot')[current].classList.remove('active');
+  current=idx;
+  document.getElementById('slide-'+current).classList.add('active');
+  document.querySelectorAll('.dot')[current].classList.add('active');
+  document.getElementById('caption-text').textContent=lakes[current].name;
+  resetProg();
+}
+function next(){goTo((current+1)%lakes.length);}
+function prev(){goTo((current+lakes.length-1)%lakes.length);}
+function resetProg(){
+  clearTimeout(autoTimer);
+  var bar=document.getElementById('progress');
+  bar.style.transition='none';bar.style.width='0%';
+  setTimeout(function(){bar.style.transition='width '+DUR+'ms linear';bar.style.width='100%';},40);
+  autoTimer=setTimeout(next,DUR);
+}
+resetProg();
+
+// ── TABS ──
+function switchTab(btn,panelId){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  ['events-panel','sales-panel','market-panel','rental-panel'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.style.display=(id===panelId)?'block':'none';
+  });
+}
+
+// ── LAKE FINDER ──
+function findLake(){
+  var sel=document.getElementById('lakeSelect');
+  if(sel.value) alert('Loading lake page for: '+sel.value+'\n\n(Full lake pages coming soon — each will show the map, members, conditions, and local events for that specific lake!)');
+  else alert('Please select a lake first.');
+}
+</script>
+</body>
+</html>
