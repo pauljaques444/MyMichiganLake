@@ -25,3 +25,24 @@ export interface Post {
   created_at: string
   profiles: Profile | null
 }
+
+export type PriceType = 'sale' | 'rent_day' | 'rent_hour' | 'free'
+export type ListingCategory = 'boats' | 'pwc' | 'dock' | 'fishing' | 'paddleboard' | 'kayak' | 'other'
+export type ListingCondition = 'new' | 'like_new' | 'good' | 'fair'
+export type ListingStatus = 'active' | 'sold' | 'rented'
+
+export interface Listing {
+  id: string
+  user_id: string
+  title: string
+  description: string | null
+  price: number | null
+  price_type: PriceType
+  category: ListingCategory
+  condition: ListingCondition | null
+  lake_name: string | null
+  images: string[]
+  status: ListingStatus
+  created_at: string
+  profiles?: Profile | null
+}
