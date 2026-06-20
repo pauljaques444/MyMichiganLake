@@ -2,11 +2,24 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { Bell, LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function TopNav() {
   const router = useRouter()
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  useEffect(() => {
+    async function fetchUnread() {
+      const supabase = createClient()
+      const { data } = await supabase.rpc('unread_message_count')
+      setUnreadCount(data ?? 0)
+    }
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -26,8 +39,8 @@ export default function TopNav() {
         <nav className="hidden md:flex items-center gap-1">
           {[
             { href: '/feed', label: 'Feed' },
-            { href: '/map', label: 'Map' },
             { href: '/marketplace', label: 'Marketplace' },
+            { href: '/messages', label: 'Messages' },
             { href: '/alerts', label: 'Alerts' },
           ].map((item) => (
             <Link
@@ -41,8 +54,13 @@ export default function TopNav() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/alerts" className="relative text-gray-500 hover:text-water-700 transition-colors">
+          <Link href="/messages" className="relative text-gray-500 hover:text-water-700 transition-colors">
             <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-water-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
           </Link>
           <Link
             href="/profile"

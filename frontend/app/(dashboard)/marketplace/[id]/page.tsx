@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { OwnerActions } from '@/components/marketplace/OwnerActions'
+import { MessageThread } from '@/components/marketplace/MessageThread'
 import { formatPrice } from '@/components/marketplace/ListingCard'
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -114,13 +115,11 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
             <OwnerActions listingId={listing.id} status={listing.status} />
           ) : (
             listing.status === 'active' && (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600 text-center">
-                Interested? Find{' '}
-                <span className="font-medium">
-                  {listing.profiles?.display_name ?? 'the seller'}
-                </span>{' '}
-                in the community feed to connect.
-              </div>
+              <MessageThread
+                listingId={listing.id}
+                sellerId={listing.user_id}
+                sellerName={listing.profiles?.display_name ?? 'Seller'}
+              />
             )
           )}
         </div>

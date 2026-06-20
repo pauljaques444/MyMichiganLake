@@ -1,14 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
-export default function SignInPage() {
-  const router = useRouter()
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -18,25 +16,51 @@ export default function SignInPage() {
     setError('')
 
     const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${siteUrl}/auth/callback?next=/reset-password`,
+    })
 
-    if (signInError) {
-      setError(signInError.message)
+    if (resetError) {
+      setError(resetError.message)
       setLoading(false)
       return
     }
 
-    router.push('/feed')
-    router.refresh()
+    setSent(true)
+    setLoading(false)
+  }
+
+  if (sent) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-water-600 to-water-900 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8 text-center space-y-4">
+          <div className="text-5xl">📬</div>
+          <h2 className="text-xl font-bold text-gray-900">Check your email</h2>
+          <p className="text-gray-500 text-sm">
+            We sent a password reset link to <strong>{email}</strong>. Click it to set a new
+            password.
+          </p>
+          <Link
+            href="/sign-in"
+            className="inline-block mt-2 text-water-600 font-semibold text-sm hover:underline"
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-water-600 to-water-900 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8 space-y-6">
         <div className="text-center">
-          <span className="text-4xl">⚓</span>
-          <h1 className="text-2xl font-bold mt-2 text-gray-900">Welcome back</h1>
-          <p className="text-gray-500 text-sm mt-1">Sign in to your lake community</p>
+          <span className="text-4xl">🔑</span>
+          <h1 className="text-2xl font-bold mt-2 text-gray-900">Reset password</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Enter your email and we&apos;ll send you a reset link
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -52,23 +76,6 @@ export default function SignInPage() {
               placeholder="you@example.com"
             />
           </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <Link href="/forgot-password" className="text-xs text-water-600 hover:underline">
-                Forgot password?
-              </Link>
-            </div>
-            <input
-              type="password"
-              required
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-water-400"
-              placeholder="••••••••"
-            />
-          </div>
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -77,14 +84,14 @@ export default function SignInPage() {
             disabled={loading}
             className="w-full bg-water-600 text-white font-semibold py-2.5 rounded-lg hover:bg-water-700 disabled:opacity-40 transition-colors"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? 'Sending...' : 'Send reset link'}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-500">
-          New here?{' '}
-          <Link href="/sign-up" className="text-water-600 font-semibold hover:underline">
-            Create an account
+          Remembered it?{' '}
+          <Link href="/sign-in" className="text-water-600 font-semibold hover:underline">
+            Sign in
           </Link>
         </p>
       </div>

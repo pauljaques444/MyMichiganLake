@@ -31,6 +31,28 @@ export type ListingCategory = 'boats' | 'pwc' | 'dock' | 'fishing' | 'paddleboar
 export type ListingCondition = 'new' | 'like_new' | 'good' | 'fair'
 export type ListingStatus = 'active' | 'sold' | 'rented'
 
+export interface Conversation {
+  id: string
+  listing_id: string
+  buyer_id: string
+  seller_id: string
+  created_at: string
+  listing?: { id: string; title: string; images: string[] } | null
+  buyer?: { id: string; display_name: string } | null
+  seller?: { id: string; display_name: string } | null
+  last_message?: string | null
+  unread_count?: number
+}
+
+export interface Message {
+  id: string
+  conversation_id: string
+  sender_id: string
+  body: string
+  read_at: string | null
+  created_at: string
+}
+
 export interface Listing {
   id: string
   user_id: string
