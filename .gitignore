@@ -22,3 +22,4 @@ backend/app/__pycache__/
 # OS
 .DS_Store
 Thumbs.db
+clerk-nextjs
