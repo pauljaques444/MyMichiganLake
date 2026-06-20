@@ -3,7 +3,7 @@ import { Listing } from '@/lib/supabase/queries'
 
 const CATEGORY_LABELS: Record<string, string> = {
   boats: 'Boats', pwc: 'PWC / Jet Ski', dock: 'Dock Equipment',
-  fishing: 'Fishing', paddleboard: 'Paddleboard', kayak: 'Kayak', other: 'Other',
+  fishing: 'Fishing', paddleboard: 'Paddleboard', kayak: 'Kayak', canoe: 'Canoe', other: 'Other',
 }
 
 export function formatPrice(listing: Pick<Listing, 'price' | 'price_type'>): string {

@@ -27,7 +27,7 @@ export interface Post {
 }
 
 export type PriceType = 'sale' | 'rent_day' | 'rent_hour' | 'free'
-export type ListingCategory = 'boats' | 'pwc' | 'dock' | 'fishing' | 'paddleboard' | 'kayak' | 'other'
+export type ListingCategory = 'boats' | 'pwc' | 'dock' | 'fishing' | 'paddleboard' | 'kayak' | 'canoe' | 'other'
 export type ListingCondition = 'new' | 'like_new' | 'good' | 'fair'
 export type ListingStatus = 'active' | 'sold' | 'rented'
 

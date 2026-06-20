@@ -13,6 +13,7 @@ const CATEGORIES: { value: ListingCategory; label: string }[] = [
   { value: 'fishing', label: 'Fishing Gear' },
   { value: 'paddleboard', label: 'Paddleboard' },
   { value: 'kayak', label: 'Kayak' },
+  { value: 'canoe', label: 'Canoe' },
   { value: 'other', label: 'Other' },
 ]
 
@@ -227,12 +228,12 @@ export default function NewListingPage() {
             <div className="relative">
               <span className="absolute left-3 top-2 text-gray-400 text-sm">$</span>
               <input
-                type="number"
-                min="0"
-                step="1"
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 required
                 value={form.price}
-                onChange={(e) => setField('price', e.target.value)}
+                onChange={(e) => setField('price', e.target.value.replace(/[^0-9.]/g, ''))}
                 className="w-full border rounded-lg pl-7 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-water-400"
                 placeholder="0"
               />

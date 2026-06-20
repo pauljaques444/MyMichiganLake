@@ -7,7 +7,7 @@ import { formatPrice } from '@/components/marketplace/ListingCard'
 
 const CATEGORY_LABELS: Record<string, string> = {
   boats: 'Boats', pwc: 'PWC / Jet Ski', dock: 'Dock Equipment',
-  fishing: 'Fishing Gear', paddleboard: 'Paddleboard', kayak: 'Kayak', other: 'Other',
+  fishing: 'Fishing Gear', paddleboard: 'Paddleboard', kayak: 'Kayak', canoe: 'Canoe', other: 'Other',
 }
 const CONDITION_LABELS: Record<string, string> = {
   new: 'New', like_new: 'Like New', good: 'Good', fair: 'Fair',
