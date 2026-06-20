@@ -107,14 +107,22 @@ export function MessageThread({ listingId, sellerId, sellerName }: MessageThread
   async function sendMessage() {
     if (!input.trim() || !conversationId || !userId || sending) return
     setSending(true)
+    const body = input.trim()
     const supabase = createClient()
     await supabase.from('messages').insert({
       conversation_id: conversationId,
       sender_id: userId,
-      body: input.trim(),
+      body,
     })
     setInput('')
     setSending(false)
+
+    // Fire-and-forget email notification — don't block the UI
+    fetch('/api/notify-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversationId, messageBody: body, senderId: userId }),
+    })
   }
 
   if (loading) return null
