@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import PostCard from '@/components/feed/PostCard'
 import CreatePost from '@/components/feed/CreatePost'
+import WeatherCard from '@/components/feed/WeatherCard'
 import type { Post } from '@/lib/supabase/queries'
 
 export default function FeedPage() {
@@ -36,6 +37,7 @@ export default function FeedPage() {
 
   return (
     <div className="max-w-2xl space-y-4">
+      <WeatherCard />
       <CreatePost onCreated={handleCreated} />
 
       {loading && (

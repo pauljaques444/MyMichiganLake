@@ -40,12 +40,14 @@ Key code locations: Supabase helpers in `frontend/lib/supabase/` (client, server
 | **Messaging** | ✅ Working | Buyer↔seller conversations per listing (`conversations` + `messages` tables), unread-count RPC, Resend email notifications. |
 | **Map** | 🔴 Stub | Placeholder page — Mapbox planned. |
 | **Safety alerts** | 🔴 Stub | Placeholder page — NOAA planned. |
-| **Weather** | 🟡 In build | v1 planned 2026-07-02 (see strategy #3): `lakes` table + Open-Meteo API route + feed weather card. |
+| **Weather** | ✅ Built | v1 shipped 2026-07-02: `lakes` table + Open-Meteo API route + `WeatherCard` on the feed. **Requires running `supabase/lakes.sql` in the SQL Editor** (geocoding fallback covers the gap until then). |
 | **Lake-scoped threads** | 🔴 Not built | Feed is global; lake data exists on profiles but isn't used for scoping. |
 | **Production deploy** | 🔴 Not done | The single biggest gap — app runs locally only. |
 
 ### Biggest blocker
 None technical. The gap is deployment: a fully working app is sitting locally while the domain serves a static mockup.
+
+**Local environment note (2026-07-02):** this machine has Node 18.12.1, but Next 16 requires ≥ 20.9 — `next build` and `next dev` refuse to start locally. Upgrade Node (e.g. `winget install OpenJS.NodeJS.LTS`). Typecheck (`npm run typecheck`) works on 18; Netlify builds on Node 20+ so deploys are unaffected.
 
 ---
 
@@ -70,7 +72,7 @@ The NextDoor half of the vision. Lake data already flows through onboarding into
 - **Frontend:** feed default becomes "my lake" with an "All lakes" toggle; onboarding lake step becomes a typeahead over `lakes` instead of free text; comment thread + reaction bar on `PostCard`.
 - **Why a lakes table now:** map, weather, alerts, directory, and events all need lake identity + coordinates. Every later feature keys off it — build it once here.
 
-### 3. Lake weather (daily-visit driver) — v1 planned 2026-07-02
+### 3. Lake weather (daily-visit driver) — ✅ v1 shipped 2026-07-02
 
 - **External service:** Open-Meteo — free, no API key, no signup. Air temp, wind, UV from the forecast API; water temperature is not available for inland lakes, so start with air/wind/UV and add NOAA GLERL water temp later for Great Lakes shoreline only.
 - **Scope decision:** the `lakes` table ships **now** as part of this feature (it was slated for feature 2, but weather needs coordinates and building against free-text `lake_name` is a dead end). The profiles/posts FK migration stays in feature 2 — profiles keep free-text `lake_name` for the moment, and the weather API bridges the gap by name-matching.
@@ -139,3 +141,4 @@ Verified badges (7) ─────── independent, before directory (8)
 | 2026-06-19 | Claude | In-platform buyer↔seller messaging (`conversations`/`messages` tables, unread-count RPC), Resend email notifications, marketplace search + canoe category, removed clerk-nextjs ghost submodule permanently. |
 | 2026-07-02 | Claude | Rewrote heartbeat to match post-pivot reality; replaced stale Clerk/Docker goals with per-feature integration strategies and dependency graph. |
 | 2026-07-02 | Claude | Planned weather v1: pulled the `lakes` table forward from feature 2 (seeded, name-matched from free-text `lake_name`, geocoding fallback), Open-Meteo route handler with 30-min cache, `WeatherCard` on the feed. |
+| 2026-07-02 | Claude | Built weather v1: `supabase/lakes.sql` (41 seeded MI lakes, public-read RLS), `GET /api/weather?lake=` (seeded match → geocoding fallback → Open-Meteo forecast, 30-min cache), `WeatherCard` (current + 3-day) on the feed. Typecheck passes; both external APIs verified live. Flagged: local Node 18 can't run Next 16 — `next build`/`dev` need Node ≥ 20.9. |
