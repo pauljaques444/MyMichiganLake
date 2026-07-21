@@ -13,7 +13,21 @@ export interface Profile {
   bio: string | null
   avatar_url: string | null
   lake_name: string | null
+  lake_id: string | null
   onboarding_complete: boolean
+}
+
+export interface AdCampaign {
+  id: string
+  title: string
+  body: string
+  cta_text: string
+  cta_url: string
+  image_url: string | null
+  placement: string
+  lake_ids: string[]
+  active: boolean
+  created_at: string
 }
 
 export interface Post {

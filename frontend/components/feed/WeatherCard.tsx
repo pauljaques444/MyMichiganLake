@@ -56,7 +56,11 @@ function dayLabel(date: string, index: number): string {
   return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short' })
 }
 
-export default function WeatherCard() {
+interface Props {
+  lakeName?: string | null
+}
+
+export default function WeatherCard({ lakeName: lakeNameProp }: Props = {}) {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [noLake, setNoLake] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -65,19 +69,26 @@ export default function WeatherCard() {
   useEffect(() => {
     async function load() {
       try {
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return setFailed(true)
+        let lakeName = lakeNameProp ?? null
 
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('lake_name')
-          .eq('id', user.id)
-          .single()
+        // Only fetch profile if lake wasn't passed in from parent
+        if (lakeName === undefined || lakeName === null) {
+          const supabase = createClient()
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) return setFailed(true)
 
-        if (!profile?.lake_name) return setNoLake(true)
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('lake_name')
+            .eq('id', user.id)
+            .single()
 
-        const res = await fetch(`/api/weather?lake=${encodeURIComponent(profile.lake_name)}`)
+          lakeName = profile?.lake_name ?? null
+        }
+
+        if (!lakeName) return setNoLake(true)
+
+        const res = await fetch(`/api/weather?lake=${encodeURIComponent(lakeName)}`)
         if (!res.ok) return setFailed(true)
         setWeather(await res.json())
       } catch {
@@ -87,7 +98,7 @@ export default function WeatherCard() {
       }
     }
     load()
-  }, [])
+  }, [lakeNameProp])
 
   // A broken weather card shouldn't break the feed
   if (failed) return null

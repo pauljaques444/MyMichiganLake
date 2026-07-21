@@ -1,6 +1,6 @@
 # MyMichiganLake — Project Heartbeat
 
-> Last updated: 2026-07-19
+> Last updated: 2026-07-21
 > Updated by: Claude
 
 ---
@@ -44,6 +44,7 @@ Key code: Supabase helpers in `frontend/lib/supabase/` (client, server, queries)
 | **Lake reference table** | ✅ In DB | `supabase/lakes.sql` — 57 Michigan inland lakes (name, county, lat, lng, created_at), public-read RLS, lowercase name index. **Must be run in SQL Editor if not done yet.** |
 | **Canoe category** | ⚠️ Code only | `ListingCategory` type + UI include canoe; the DB `CHECK` constraint still needs `add_canoe_category.sql` run in SQL Editor. |
 | **Test suite** | ✅ Working | `npm run test:run` — 40/40 pass, 1 security todo. Run `supabase test db` for the 32 pgTAP RLS tests. |
+| **Sponsored feed cards** | ✅ Code done | Every 5th feed slot is a `SponsoredCard` (same card shape, "Sponsored" label). Targeted by `profiles.lake_id` FK. `ad_campaigns` + `ad_impressions` tables — run `supabase/ad_campaigns.sql`. Seeded Torch Lake Marina (lake-targeted) + BoatUS (run-of-house). |
 | **Map** | 🔴 Stub | Placeholder page — Mapbox planned. |
 | **Safety alerts** | 🔴 Stub | Placeholder page — NOAA NWS planned. |
 | **Lake-scoped threads** | 🔴 Not built | Feed is global. Lakes table + onboarding autocomplete are done; lake FK migration and feed scoping are the next major feature. |
@@ -238,7 +239,7 @@ Rental checkout (7) ─────────── requires Michigan maritime
 | Open-redirect via `?next=` in auth callback | `app/auth/callback/route.ts` | Medium |
 | `listings` category CHECK constraint missing 'canoe' | DB — run `add_canoe_category.sql` | Medium |
 | Feed not scoped by lake | `app/(dashboard)/feed/page.tsx` | Medium (roadmap item) |
-| `profiles.lake_name` is still free text, not FK to `lakes` | DB + onboarding | Low (gradual migration) |
+| `profiles.lake_name` is still free text alongside new `lake_id` FK | DB + onboarding | Low — both columns coexist, gradual migration |
 | Node 18 locally — Next.js 16 requires ≥ 20.9 | Local dev only | Low (Netlify runs 20+) |
 
 ---
@@ -256,3 +257,4 @@ Rental checkout (7) ─────────── requires Michigan maritime
 | 2026-07-02 | Claude | Rewrote heartbeat. Built weather v1: `supabase/lakes.sql` (41 seeded MI lakes), `GET /api/weather?lake=` with geocoding fallback + 30-min cache, `WeatherCard` on feed. |
 | 2026-07-19 | Claude | Forgot/reset password flow. Onboarding lake field: replaced free-text with autocomplete combobox (filtered against `lakes` table) + "Use my location" geolocation button (haversine nearest-lake). Merged `lakes.sql` from remote — 57 Michigan lakes, `created_at` column, lowercase name index. Extracted `haversineMiles` to `lib/geo.ts`. |
 | 2026-07-19 | Claude | Added Vitest test suite: 40 JS tests across geo, notify-message API (incl. dedup + Resend payload), weather API (lake resolution + fallback chain + 502), auth-callback, and middleware route-protection matrix. Added `supabase/tests/rls.test.sql`: 32 pgTAP assertions covering all RLS policies for profiles, posts, listings, conversations, and messages. |
+| 2026-07-21 | Claude | Sponsored feed cards (placement: feed_inline). Every 5th post slot injects a `SponsoredCard` — same card shape as `PostCard`, amber Megaphone avatar, "Sponsored" label, CTA link, impression tracking on hover. Targeted by `profiles.lake_id` (FK added to profiles via `ad_campaigns.sql`); falls back to run-of-house ads when no lake match. Onboarding now saves `lake_id` (uuid FK) alongside `lake_name` text. `AdCampaign` type added to `queries.ts`. Two seed ads: Torch Lake Marina (lake-targeted) + BoatUS (run-of-house). |

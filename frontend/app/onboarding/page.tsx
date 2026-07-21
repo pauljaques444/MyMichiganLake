@@ -8,6 +8,7 @@ import { haversineMiles } from '@/lib/geo'
 type Step = 'profile' | 'property' | 'done'
 
 interface Lake {
+  id: string
   name: string
   county: string | null
   lat: number
@@ -30,6 +31,7 @@ export default function OnboardingPage() {
   const [profile, setProfile] = useState({ display_name: '', bio: '' })
   const [property, setProperty] = useState({
     lake_name: '',
+    lake_id: '' as string | null,
     address_line1: '',
     city: '',
     state: 'MI',
@@ -40,7 +42,7 @@ export default function OnboardingPage() {
   useEffect(() => {
     async function fetchLakes() {
       const supabase = createClient()
-      const { data } = await supabase.from('lakes').select('name, county, lat, lng').order('name')
+      const { data } = await supabase.from('lakes').select('id, name, county, lat, lng').order('name')
       setLakes(data ?? [])
     }
     fetchLakes()
@@ -69,7 +71,7 @@ export default function OnboardingPage() {
 
   function selectLake(lake: Lake) {
     setLakeInput(lake.name)
-    setProperty((p) => ({ ...p, lake_name: lake.name }))
+    setProperty((p) => ({ ...p, lake_name: lake.name, lake_id: lake.id }))
     setLakeConfirmed(true)
     setSuggestions([])
     setGeoError('')
@@ -78,7 +80,7 @@ export default function OnboardingPage() {
   function handleLakeInputChange(val: string) {
     setLakeInput(val)
     setLakeConfirmed(false)
-    setProperty((p) => ({ ...p, lake_name: '' }))
+    setProperty((p) => ({ ...p, lake_name: '', lake_id: null }))
   }
 
   async function handleUseLocation() {
@@ -134,6 +136,7 @@ export default function OnboardingPage() {
       display_name: profile.display_name,
       bio: profile.bio || null,
       lake_name: property.lake_name || null,
+      lake_id: property.lake_id || null,
       address_line1: property.address_line1,
       city: property.city,
       state: property.state,
