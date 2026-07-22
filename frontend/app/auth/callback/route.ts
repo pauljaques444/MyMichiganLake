@@ -7,7 +7,8 @@ type CookieToSet = { name: string; value: string; options?: Record<string, unkno
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/onboarding'
+  const rawNext = searchParams.get('next') ?? '/onboarding'
+  const next = rawNext.startsWith('/') ? rawNext : '/onboarding'
 
   if (code) {
     const cookieStore = await cookies()

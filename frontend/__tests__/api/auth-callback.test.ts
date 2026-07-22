@@ -80,19 +80,14 @@ describe('GET /auth/callback', () => {
     expect(res.headers.get('location')).toContain('/sign-in?error=auth_callback_failed')
   })
 
-  it('the redirect stays within the same origin (no open redirect)', async () => {
+  it('rejects open-redirect — external ?next= falls back to /onboarding', async () => {
     mockExchangeCode.mockResolvedValue({ error: null })
 
     const { GET } = await import('../../app/auth/callback/route')
-    // Attacker tries to redirect to external site via the `next` param
     const res = await GET(makeRequest({ code: 'valid-code', next: 'https://evil.com/steal' }))
 
     const location = res.headers.get('location') ?? ''
-    // The route prepends `origin`, so the result should be localhost + the next param as a path
-    // An external URL used as `next` becomes "http://localhosthttps://evil.com/steal" — malformed
-    // The real protection is that `next` should be validated to be a relative path.
-    // This test documents current behavior so a regression is visible.
-    expect(location).toContain('localhost')
-    expect(location).not.toMatch(/^https?:\/\/evil\.com/)
+    expect(location).toContain('/onboarding')
+    expect(location).not.toContain('evil.com')
   })
 })

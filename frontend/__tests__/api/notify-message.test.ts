@@ -1,19 +1,29 @@
 /**
  * Tests for POST /api/notify-message
  *
- * This route sends an email notification to the listing seller (or buyer) when
- * a new message is sent in a conversation. It uses the Supabase service role key
- * (admin privileges) and the Resend API.
+ * Sends an email notification to the recipient when a new message arrives.
+ * Uses Supabase service role key (admin) + Resend API.
  *
- * SECURITY NOTE: This route currently has NO authentication check. Any caller
- * with a valid conversationId and senderId can trigger email notifications.
- * See the .todo test below — it should be a real test once auth is added.
+ * Auth: requires a valid session cookie. Caller must match senderId.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
 
-// Module-level mock handles — reconfigured per test
+// ── Auth client mock (@supabase/ssr) ────────────────────────────────────────
+const mockGetUser = vi.fn()
+
+vi.mock('@supabase/ssr', () => ({
+  createServerClient: vi.fn(() => ({
+    auth: { getUser: mockGetUser },
+  })),
+}))
+
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(() => ({ getAll: () => [] })),
+}))
+
+// ── Service-role client mock (@supabase/supabase-js) ────────────────────────
 const mockConversationSingle = vi.fn()
 const mockMessageCountIs = vi.fn()
 const mockGetUserById = vi.fn()
@@ -67,7 +77,9 @@ function makeRequest(body: Record<string, unknown>) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  // Default: fetch succeeds for Resend
+  // Default: signed in as buyer
+  mockGetUser.mockResolvedValue({ data: { user: { id: 'buyer-1' } } })
+  // Default: Resend succeeds
   vi.stubGlobal(
     'fetch',
     vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ id: 'email-id' }) })
@@ -75,7 +87,23 @@ beforeEach(() => {
 })
 
 describe('POST /api/notify-message', () => {
-  it.todo('should require authentication — returns 401 for unauthenticated callers (security gap: currently unenforced)')
+  it('returns 401 for unauthenticated callers', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const { POST } = await import('../../app/api/notify-message/route')
+    const res = await POST(makeRequest({ conversationId: 'conv-1', messageBody: 'hi', senderId: 'buyer-1' }))
+
+    expect(res.status).toBe(401)
+  })
+
+  it('returns 403 when caller id does not match senderId', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'some-other-user' } } })
+
+    const { POST } = await import('../../app/api/notify-message/route')
+    const res = await POST(makeRequest({ conversationId: 'conv-1', messageBody: 'hi', senderId: 'buyer-1' }))
+
+    expect(res.status).toBe(403)
+  })
 
   it('returns 404 when conversation does not exist', async () => {
     mockConversationSingle.mockResolvedValue({ data: null })
@@ -136,6 +164,7 @@ describe('POST /api/notify-message', () => {
   })
 
   it('correctly identifies the buyer as the recipient when seller sends a message', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'seller-1' } } })
     mockConversationSingle.mockResolvedValue({ data: FAKE_CONVERSATION })
     mockMessageCountIs.mockResolvedValue({ count: 1 })
     mockGetUserById.mockResolvedValue({ data: { user: { id: 'buyer-1', email: 'alice@example.com' } } })
