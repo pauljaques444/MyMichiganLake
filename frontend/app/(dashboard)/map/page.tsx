@@ -57,9 +57,10 @@ export default async function MapPage() {
         </div>
       </div>
 
-      {/* Map */}
+      {/* Map — isolate creates a new stacking context so Leaflet's internal
+          z-indices (up to ~1000) don't escape and overlap the nav menu */}
       <div
-        className="bg-white rounded-xl border border-gray-200 overflow-hidden"
+        className="bg-white rounded-xl border border-gray-200 overflow-hidden isolate"
         style={{ height: 'calc(100vh - 180px)', minHeight: 480 }}
       >
         <MichiganMap lakes={lakes} listings={listings} userLakeId={userLakeId} />
