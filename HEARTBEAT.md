@@ -1,6 +1,6 @@
 # MyMichiganLake — Project Heartbeat
 
-> Last updated: 2026-07-22
+> Last updated: 2026-07-22 (feature audit pass)
 > Verified state: ✅ TypeScript OK · ✅ 42/42 tests passing · ✅ All commits pushed to origin
 
 ---
@@ -42,12 +42,12 @@ Key code: Supabase helpers in `frontend/lib/supabase/` (client, server, queries)
 | **Auth + onboarding** | ✅ Working | Sign-up → email confirm → 2-step onboarding. Forgot/reset password. Lake autocomplete + "Use my location" geolocation (haversine nearest-lake). Saves both `lake_name` (text) and `lake_id` (FK). |
 | **Feed / posts** | ✅ Working | Create post, global feed, categories, urgent flag, weather card at top. Feed is **global** — not yet scoped per lake. |
 | **Profile** | ✅ Working | Edit form with display name, bio, and full lake autocomplete + geolocation picker. Saves `lake_name` + `lake_id` together. |
-| **Marketplace** | ✅ Working | Browse with search + category filters (incl. canoes), create listing with up to 5 photos, listing detail, owner actions (mark sold/rented/relist/delete). |
-| **Messaging** | ✅ Working | Buyer↔seller threads per listing, safety modal on first contact, Realtime subscription, unread-count RPC, Resend email notifications (with dedup). Auth-checked — caller must match `senderId`. |
+| **Marketplace** | ✅ Core working / ⚠️ gaps | Browse + search + 8 category filters, create listing (5 photos, price types, condition, lake), listing detail with photo gallery + seller card + owner actions (mark sold/rented/relist/delete). **Missing:** edit listing page, My Listings page (own listings incl. sold/rented), map popup links go to `/marketplace` unfiltered not to specific listing. |
+| **Messaging** | ✅ Core working / ⚠️ UX gaps | Buyer↔seller threads per listing, safety modal, Supabase Realtime (instant delivery), read receipts, unread badges in TopNav + inbox, Resend email notifications with dedup. Auth-checked. **Missing:** messages inbox links navigate to the listing page (user must scroll to thread — no dedicated conversation URL), no message timestamps shown, N+1 queries in inbox load (one query per conversation for last_message + unread). |
 | **Weather card** | ✅ Working | WeatherCard on feed accepts `lakeName` prop from feed page (no duplicate profile fetch). Falls back to self-fetching when used standalone. |
 | **Sponsored feed cards** | ✅ Working | Every 5th feed slot is a `SponsoredCard`. Targeted by `profiles.lake_id`; falls back to run-of-house. `ad_campaigns` + `ad_impressions` tables — run `supabase/ad_campaigns.sql`. |
 | **Safety alerts** | ✅ Working | Live NOAA NWS alerts scoped to user's county via `lake_id → lake.county → MIC{FIPS}`. Severity-coded cards (Extreme/Severe/Moderate/Minor). Local county opt-in signup card (OakAlert, CodeRED, Smart911, RAVE, B-WARN, Nixle). All 83 Michigan counties mapped in `lib/nws.ts`. |
-| **Interactive map** | ✅ Working | Leaflet, Carto Voyager tiles. All 56 DB lakes as circle markers — amber/gold = home lake, brighter blue = has listings, radius scales with count. Popup shows lake name, county, up to 3 listing previews with emoji + price. Server RSC pre-fetches lakes + listings + user lake_id in parallel. Flies to home lake on load. |
+| **Interactive map** | ✅ Working / ⚠️ shallow links | Leaflet, Carto Voyager tiles. 56 lake markers — amber = home lake, bright blue = has listings, radius scales with count. Popup: lake name, county, up to 3 listing previews with emoji + price. Flies to home lake on load. **Missing:** popup listing items link to `/marketplace` (unfiltered) not to the specific listing detail page; no category filter on the map itself. |
 | **Mobile nav** | ✅ Working | Hamburger menu `☰` in TopNav (visible below `md`). Slide-down drawer with all 6 nav links + Waterfront shortcuts + sign out. Closes on route change, outside tap, or backdrop click. Map container uses `isolation: isolate` to keep Leaflet's z-indices (200–800) from overlapping the `z-40` drawer. |
 | **Google AdSense** | ⚠️ Pending | Script is in server-rendered `<head>` (native `<script>`, not Next.js `<Script>`). Application submitted — awaiting Google approval. |
 | **Lake reference table** | ✅ In DB | `supabase/lakes.sql` — 56 Michigan inland lakes (name, county, lat, lng), public-read RLS. Must be run in SQL Editor if not done. |
@@ -62,37 +62,23 @@ Key code: Supabase helpers in `frontend/lib/supabase/` (client, server, queries)
 
 ## Immediate Actions Required (manual — no code)
 
-### 1. Run missing SQL migrations in Supabase SQL Editor
+### ✅ Done
+- SQL migrations run (`lakes.sql`, `ad_campaigns.sql`, `add_canoe_category.sql`)
+- Netlify env vars added (`SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `FROM_EMAIL`)
 
-Go to [supabase.com → SQL Editor](https://supabase.com/dashboard/project/_/sql) and run:
+### Still pending
 
-```
-supabase/lakes.sql              — seeds 56 Michigan lakes (map + onboarding autocomplete)
-supabase/ad_campaigns.sql       — creates ad_campaigns + ad_impressions, adds lake_id FK to profiles
-supabase/add_canoe_category.sql — patches listings CHECK constraint to allow 'canoe'
-```
+**1. Verify GoDaddy domain in Resend**
 
-All files use `ON CONFLICT DO NOTHING` / `IF NOT EXISTS`, so re-running is safe.
+Until verified, Resend can only send email to your own account address — real users get no message notifications. Go to Resend → Domains → add your GoDaddy domain → copy the 3 DNS records (TXT + DKIM + return-path MX) → add them in GoDaddy DNS Manager → click Verify. Propagates within ~1 hour.
 
-### 2. Add missing Netlify environment variables
+**2. Re-verify Google AdSense**
 
-Go to Netlify → Site → Environment variables:
+Privacy policy is now live at `/privacy`. After Netlify finishes deploying this latest push, view page source and confirm the AdSense `<script>` is in the raw `<head>`. Then click Verify in AdSense. Add `https://mymichiganlake.netlify.app/privacy` in your AdSense account under Privacy & messaging settings.
 
-| Variable | Value |
-|---|---|
-| `SUPABASE_SERVICE_ROLE_KEY` | From Supabase → Settings → API → service_role key |
-| `RESEND_API_KEY` | From Resend dashboard |
-| `FROM_EMAIL` | Your verified sender — use `onboarding@resend.dev` until domain is verified |
+**3. Link privacy policy in AdSense**
 
-Without `SUPABASE_SERVICE_ROLE_KEY` the notify-message route crashes silently (emails don't go out).
-
-### 3. Verify your domain in Resend
-
-Until verified, Resend can only send to your own account email. Resend → Domains → add GoDaddy domain → add DNS records.
-
-### 4. Re-verify Google AdSense
-
-After Netlify deploys, view page source and confirm the AdSense `<script>` appears in raw `<head>` HTML. Then click Verify in AdSense. URL in AdSense must match `mymichiganlake.netlify.app` exactly.
+In AdSense → Account → Privacy & messaging → add the URL: `https://mymichiganlake.netlify.app/privacy`
 
 ---
 
@@ -166,7 +152,11 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 |---|---|---|
 | `listings` category CHECK constraint missing 'canoe' | DB — run `add_canoe_category.sql` | Medium |
 | Feed not scoped by lake | `app/(dashboard)/feed/page.tsx` | Medium (Priority 1) |
-| Map listing popups link to `/marketplace` unfiltered | `components/map/MapInner.tsx` | Low (Priority 2) |
+| Messages inbox links navigate to listing page — no dedicated conversation URL | `app/(dashboard)/messages/page.tsx` | Medium — poor UX on mobile |
+| N+1 queries in messages inbox (one RPC per conversation) | `app/(dashboard)/messages/page.tsx` | Low — fine at <50 convos |
+| Map popup listing items link to `/marketplace` unfiltered, not specific listing | `components/map/MapInner.tsx` | Low (Priority 2) |
+| No edit listing page | No file yet | Medium (Priority 2) |
+| No My Listings page (own sold/rented history) | No file yet | Medium (Priority 2) |
 | `profiles.lake_name` text coexists with `lake_id` FK | DB + onboarding | Low — both intentional during gradual migration |
 | Node 18 locally vs Next.js 16 requires ≥ 20.9 | Local dev only | Low (Netlify runs 20+) |
 
@@ -194,3 +184,5 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 | 2026-07-22 | Claude | Interactive map: Leaflet + Carto Voyager tiles (no API key). 56 DB lakes as circle markers — amber/gold for home lake, bright blue for lakes with listings, radius scales with listing count. Popup: lake name, county, up to 3 listing previews with category emoji + price. Server RSC fetches lakes + listings + lake_id in parallel. Flies to home lake on load. |
 | 2026-07-22 | Claude | Bug fix: `isolation: isolate` on map container prevents Leaflet's internal z-indices (200–800) from overlapping the `z-40` mobile hamburger drawer. |
 | 2026-07-22 | Claude | Verified state: TypeScript clean, 42/42 tests passing, all commits pushed. `git log origin/main..HEAD` empty — branch is fully synced. |
+| 2026-07-22 | Claude | Privacy policy page at `/privacy` — 14 sections, Michigan Identity Theft Protection Act (PA 452 of 2004), Google AdSense disclosure with opt-out links, CCPA/CPRA, COPPA, third-party services table, cookie inventory. Added `/privacy` + `/terms` to middleware public allowlist. |
+| 2026-07-22 | Claude | Feature audit: identified gaps in Marketplace (no edit/My Listings), Messaging (inbox UX, N+1 queries), Map (popup links unfiltered). Updated HEARTBEAT technical debt and next steps. |
