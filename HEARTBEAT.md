@@ -1,7 +1,7 @@
 # MyMichiganLake — Project Heartbeat
 
-> Last updated: 2026-07-22 (feature audit pass)
-> Verified state: ✅ TypeScript OK · ✅ 42/42 tests passing · ✅ All commits pushed to origin
+> Last updated: 2026-08-08 (pitch prep + env fix)
+> Verified state: ✅ TypeScript OK · ✅ 42/42 tests passing · ✅ All commits pushed to origin · ✅ Netlify live — landing page confirmed loading
 
 ---
 
@@ -146,6 +146,16 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 
 ---
 
+## Known Risks
+
+| Risk | Details | Mitigation |
+|---|---|---|
+| **Wrong Supabase project in env vars** | App was pointing at old project `kkygdfptjhclmlvamovi` instead of live project `yfborgjxrsfojjtsuoek`. Caused "JWT issued at future" errors on every DB query. Fixed 2026-08-08 by updating Netlify env vars. | If Supabase credentials ever change (key rotation, new project), update BOTH `.env.local` AND Netlify env vars. Always cross-check the `ref` slug in the anon key matches the project URL. |
+| **Two Supabase projects exist** | Old project `kkygdfptjhclmlvamovi` may still be active. Any dev who uses the old `.env.local` will silently connect to the wrong DB. | Keep `.env.local` pinned to `yfborgjxrsfojjtsuoek`. The old project should be deleted from the Supabase dashboard to prevent confusion. |
+| **No staging environment** | `.env.local` and Netlify both point to the same production Supabase project. Schema changes or bad data in dev can affect production. | Acceptable for now at this stage. Before scaling, create a separate Supabase project for local dev. |
+
+---
+
 ## Known Technical Debt
 
 | Issue | File | Severity |
@@ -184,4 +194,6 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 | 2026-07-22 | Claude | Verified state: TypeScript clean, 42/42 tests passing, all commits pushed. `git log origin/main..HEAD` empty — branch is fully synced. |
 | 2026-07-22 | Claude | Privacy policy page at `/privacy` — 14 sections, Michigan Identity Theft Protection Act (PA 452 of 2004), Google AdSense disclosure with opt-out links, CCPA/CPRA, COPPA, third-party services table, cookie inventory. Added `/privacy` + `/terms` to middleware public allowlist. |
 | 2026-07-22 | Claude | Feature audit: identified gaps in Marketplace (no edit/My Listings), Messaging (inbox UX, N+1 queries), Map (popup links unfiltered). Updated HEARTBEAT technical debt and next steps. |
+| 2026-08-08 | Claude | **Pitch prep:** Lake scene hero on landing page (CSS sky→water gradient, amber horizon glow, treeline SVG, shimmer + ripple animations, floating anchor, glassmorphism feature cards). Shared `(auth)/layout.tsx` gives sign-in/sign-up the same lake background. |
+| 2026-08-08 | Claude | **Critical fix:** App was connecting to wrong Supabase project (`kkygdfptjhclmlvamovi` vs live `yfborgjxrsfojjtsuoek`). Root cause of all "JWT issued at future" errors. Fixed by updating Netlify env vars. Site confirmed live and loading. |
 | 2026-08-04 | Claude | Marketplace edit + My Listings: `EditListingForm` client component (pre-populates all fields + existing photos, handles mixed existing/new images, UPDATE with ownership check). Edit page at `/marketplace/[id]/edit` (server RSC, ownership-guarded redirect). My Listings at `/marketplace/my-listings` (server RSC, groups active vs sold/rented, inline Edit/View links + OwnerActions per card). "My Listings" button added to marketplace header. "Edit Listing" button added to listing detail owner block. TypeScript clean. |
