@@ -39,28 +39,25 @@ export default function SignUpPage() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-water-600 to-water-900 flex items-center justify-center px-4">
-        <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8 text-center space-y-4">
-          <div className="text-5xl">📬</div>
-          <h2 className="text-xl font-bold text-gray-900">Check your email</h2>
-          <p className="text-gray-500 text-sm">
-            We sent a confirmation link to <strong>{email}</strong>. Click it to activate your
-            account, then come back to sign in.
-          </p>
-          <Link
-            href="/sign-in"
-            className="inline-block mt-2 text-water-600 font-semibold text-sm hover:underline"
-          >
-            Back to sign in
-          </Link>
-        </div>
+      <div className="bg-white rounded-2xl w-full p-8 text-center space-y-4" style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
+        <div className="text-5xl">📬</div>
+        <h2 className="text-xl font-bold text-gray-900">Check your email</h2>
+        <p className="text-gray-500 text-sm">
+          We sent a confirmation link to <strong>{email}</strong>. Click it to activate your
+          account, then come back to sign in.
+        </p>
+        <Link
+          href="/sign-in"
+          className="inline-block mt-2 text-water-600 font-semibold text-sm hover:underline"
+        >
+          Back to sign in
+        </Link>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-water-600 to-water-900 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8 space-y-6">
+    <div className="bg-white rounded-2xl w-full p-8 space-y-6" style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
         <div className="text-center">
           <span className="text-4xl">⚓</span>
           <h1 className="text-2xl font-bold mt-2 text-gray-900">Join the lake</h1>
@@ -111,7 +108,6 @@ export default function SignUpPage() {
             Sign in
           </Link>
         </p>
-      </div>
     </div>
   )
 }

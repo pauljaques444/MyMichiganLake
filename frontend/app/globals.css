@@ -49,3 +49,19 @@
     color: #111827;
   }
 }
+
+/* Lake scene animations */
+@keyframes lake-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+@keyframes anchor-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes ripple-line {
+  0%, 100% { opacity: 0.12; }
+  50%       { opacity: 0.32; }
+}

@@ -58,12 +58,20 @@ export default function MarketplacePage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">Marketplace</h1>
-        <Link
-          href="/marketplace/new"
-          className="bg-water-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-water-700 transition-colors"
-        >
-          + List Item
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/marketplace/my-listings"
+            className="text-sm font-medium border border-gray-200 text-gray-600 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            My Listings
+          </Link>
+          <Link
+            href="/marketplace/new"
+            className="bg-water-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-water-700 transition-colors"
+          >
+            + List Item
+          </Link>
+        </div>
       </div>
 
       {/* Search */}

@@ -112,7 +112,15 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
           </div>
 
           {isOwner ? (
-            <OwnerActions listingId={listing.id} status={listing.status} />
+            <div className="space-y-2">
+              <Link
+                href={`/marketplace/${listing.id}/edit`}
+                className="block w-full text-center border border-water-300 text-water-600 text-sm font-medium py-2 rounded-lg hover:bg-water-50 transition-colors"
+              >
+                Edit Listing
+              </Link>
+              <OwnerActions listingId={listing.id} status={listing.status} />
+            </div>
           ) : (
             listing.status === 'active' && (
               <MessageThread

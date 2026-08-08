@@ -19,10 +19,10 @@ export default function FeedPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    async function load() {
+    async function load(retrying = false) {
       const supabase = createClient()
 
-      const [postsResult, { data: { user } }] = await Promise.all([
+      const [postsResult, authResult] = await Promise.all([
         supabase
           .from('posts')
           .select('*, profiles(*)')
@@ -30,6 +30,27 @@ export default function FeedPage() {
           .limit(50),
         supabase.auth.getUser(),
       ])
+
+      const user = authResult.data.user
+
+      // JWT clock skew — the token's iat is ahead of Supabase's server clock.
+      // Try refreshing once; if that fails, sign out so re-login gets a clean token.
+      const isJwtError =
+        postsResult.error &&
+        (postsResult.error.message.toLowerCase().includes('jwt') ||
+          postsResult.error.message.toLowerCase().includes('issued at'))
+
+      if (isJwtError && !retrying) {
+        const { error: refreshErr } = await supabase.auth.refreshSession()
+        if (!refreshErr) {
+          load(true)
+          return
+        }
+        // Refresh also failed — force sign-out so the user gets a fresh JWT on next login
+        await supabase.auth.signOut()
+        window.location.replace('/sign-in')
+        return
+      }
 
       if (postsResult.error) {
         setError(postsResult.error.message)

@@ -63,6 +63,19 @@ export default function NewListingPage() {
     setPreviews(next.map((f) => URL.createObjectURL(f)))
   }
 
+  function isJwtError(msg: string) {
+    const m = msg.toLowerCase()
+    return m.includes('jwt') || m.includes('issued at')
+  }
+
+  async function tryRefreshOrSignOut(supabase: ReturnType<typeof createClient>) {
+    const { error } = await supabase.auth.refreshSession()
+    if (!error) return true
+    await supabase.auth.signOut()
+    window.location.replace('/sign-in')
+    return false
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -83,6 +96,10 @@ export default function NewListingPage() {
       const path = `${user.id}/${Date.now()}-${file.name.replace(/\s+/g, '-')}`
       const { error: uploadErr } = await supabase.storage.from('listing-images').upload(path, file)
       if (uploadErr) {
+        if (isJwtError(uploadErr.message)) {
+          await tryRefreshOrSignOut(supabase)
+          return
+        }
         setError(`Image upload failed: ${uploadErr.message}`)
         setLoading(false)
         return
@@ -116,6 +133,10 @@ export default function NewListingPage() {
       .single()
 
     if (insertErr) {
+      if (isJwtError(insertErr.message)) {
+        await tryRefreshOrSignOut(supabase)
+        return
+      }
       setError(insertErr.message)
       setLoading(false)
       return
