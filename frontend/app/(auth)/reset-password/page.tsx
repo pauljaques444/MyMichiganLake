@@ -35,8 +35,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-water-600 to-water-900 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-8 space-y-6">
+    <div className="bg-white rounded-2xl shadow-xl w-full p-8 space-y-6" style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.35)' }}>
         <div className="text-center">
           <span className="text-4xl">🔒</span>
           <h1 className="text-2xl font-bold mt-2 text-gray-900">Set new password</h1>
@@ -83,7 +82,6 @@ export default function ResetPasswordPage() {
             {loading ? 'Updating...' : 'Update password'}
           </button>
         </form>
-      </div>
     </div>
   )
 }
