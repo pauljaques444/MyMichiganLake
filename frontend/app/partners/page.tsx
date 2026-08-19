@@ -65,7 +65,7 @@ export default function PartnersPage() {
       </header>
 
       {/* ── HERO ── */}
-      <section className="bg-gray-900 text-white py-20 px-4"
+      <section className="relative bg-gray-900 text-white py-20 px-4 overflow-hidden"
         style={{
           backgroundImage: "url('/michigan-lake.jpg')",
           backgroundSize: 'cover',
