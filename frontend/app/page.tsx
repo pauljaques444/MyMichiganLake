@@ -3,10 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
 const NAV_LINKS = [
-  { label: 'About',       href: '#about' },
-  { label: 'Community',   href: '#features' },
-  { label: 'Marketplace', href: '#features' },
-  { label: 'Lakes',       href: '#lakes' },
+  { label: 'About',           href: '#about' },
+  { label: 'Community',       href: '#features' },
+  { label: 'Marketplace',     href: '#features' },
+  { label: 'Lakes',           href: '#lakes' },
+  { label: 'Partner With Us', href: '/partners' },
 ]
 
 const FEATURES = [
@@ -306,6 +307,7 @@ export default async function LandingPage() {
               <li><Link href="/sign-up" className="hover:text-white transition-colors">Create Account</Link></li>
               <li><Link href="/sign-in" className="hover:text-white transition-colors">Sign In</Link></li>
               <li><Link href="/forgot-password" className="hover:text-white transition-colors">Reset Password</Link></li>
+              <li><Link href="/partners" className="hover:text-white transition-colors">Advertise With Us</Link></li>
             </ul>
           </div>
 

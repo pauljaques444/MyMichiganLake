@@ -373,3 +373,28 @@ SELECT
 FROM auth.users u
 WHERE u.id NOT IN (SELECT id FROM public.profiles)
 ON CONFLICT (id) DO NOTHING;
+
+
+-- ── 9. PARTNER INQUIRIES ─────────────────────────────────────
+-- Submitted by prospective business advertisers via /partners page.
+-- Anyone can insert (public form); only service role can read.
+
+CREATE TABLE IF NOT EXISTS partner_inquiries (
+  id            uuid        DEFAULT gen_random_uuid() PRIMARY KEY,
+  business_name text        NOT NULL,
+  contact_name  text        NOT NULL,
+  email         text        NOT NULL,
+  phone         text,
+  website       text,
+  lakes_served  text,
+  ad_interest   text,
+  message       text,
+  status        text        NOT NULL DEFAULT 'new',
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE partner_inquiries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can submit partner inquiry" ON partner_inquiries;
+CREATE POLICY "Anyone can submit partner inquiry" ON partner_inquiries
+  FOR INSERT WITH CHECK (true);
