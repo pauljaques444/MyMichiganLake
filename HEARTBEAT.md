@@ -1,7 +1,7 @@
 # MyMichiganLake — Project Heartbeat
 
-> Last updated: 2026-08-08 (pitch prep + env fix)
-> Verified state: ✅ TypeScript OK · ✅ 42/42 tests passing · ✅ All commits pushed to origin · ✅ Netlify live — landing page confirmed loading
+> Last updated: 2026-08-25 (multi-section landing page, partner connect flow, auth photo, callback fix)
+> Verified state: ⚠️ TypeScript not re-run · ⚠️ Tests not re-run · ✅ All commits pushed to origin · ✅ Netlify live
 
 ---
 
@@ -50,6 +50,9 @@ Key code: Supabase helpers in `frontend/lib/supabase/` (client, server, queries)
 | **Interactive map** | ✅ Working / ⚠️ shallow links | Leaflet, Carto Voyager tiles. 56 lake markers — amber = home lake, bright blue = has listings, radius scales with count. Popup: lake name, county, up to 3 listing previews with emoji + price. Flies to home lake on load. **Missing:** popup listing items link to `/marketplace` (unfiltered) not to the specific listing detail page; no category filter on the map itself. |
 | **Mobile nav** | ✅ Working | Hamburger menu `☰` in TopNav (visible below `md`). Slide-down drawer with all 6 nav links + Waterfront shortcuts + sign out. Closes on route change, outside tap, or backdrop click. Map container uses `isolation: isolate` to keep Leaflet's z-indices (200–800) from overlapping the `z-40` drawer. |
 | **Google AdSense** | ⚠️ Pending | Script is in server-rendered `<head>` (native `<script>`, not Next.js `<Script>`). Application submitted — awaiting Google approval. |
+| **Partner inquiries** | ✅ Working | `/partners` page with 3 pricing tiers ($99/$149/$249), inquiry form. `partner_inquiries` table + public INSERT RLS. Publicly accessible (no login). |
+| **Landing page** | ✅ Rebuilt | Multi-section site (sticky navbar, photo hero, about, 5 feature cards, lake directory, CTA, 4-col footer). Real Michigan lake photo as hero background. |
+| **Auth photo background** | ✅ Working | Sign-in/sign-up/forgot-password/reset-password all use real Michigan sunset photo via shared `(auth)/layout.tsx`. Blue gradient replaced. |
 | **Lake reference table** | ✅ In DB | `supabase/lakes.sql` — 56 Michigan inland lakes (name, county, lat, lng), public-read RLS. Must be run in SQL Editor if not done. |
 | **Canoe category** | ⚠️ Code only | `ListingCategory` type + UI include canoe; DB `CHECK` constraint needs `add_canoe_category.sql` run in SQL Editor. |
 | **Test suite** | ✅ 42/42 | `npm run test:run` — 42 JS tests pass. `supabase test db` for 32 pgTAP RLS tests. |
@@ -197,3 +200,8 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 | 2026-08-08 | Claude | **Pitch prep:** Lake scene hero on landing page (CSS sky→water gradient, amber horizon glow, treeline SVG, shimmer + ripple animations, floating anchor, glassmorphism feature cards). Shared `(auth)/layout.tsx` gives sign-in/sign-up the same lake background. |
 | 2026-08-08 | Claude | **Critical fix:** App was connecting to wrong Supabase project (`kkygdfptjhclmlvamovi` vs live `yfborgjxrsfojjtsuoek`). Root cause of all "JWT issued at future" errors. Fixed by updating Netlify env vars. Site confirmed live and loading. |
 | 2026-08-04 | Claude | Marketplace edit + My Listings: `EditListingForm` client component (pre-populates all fields + existing photos, handles mixed existing/new images, UPDATE with ownership check). Edit page at `/marketplace/[id]/edit` (server RSC, ownership-guarded redirect). My Listings at `/marketplace/my-listings` (server RSC, groups active vs sold/rented, inline Edit/View links + OwnerActions per card). "My Listings" button added to marketplace header. "Edit Listing" button added to listing detail owner block. TypeScript clean. |
+| 2026-08-25 | Claude | SQL consolidation: `supabase/setup.sql` — single idempotent file replacing 7 scattered migration files (schema.sql, listings.sql, messages.sql, lakes.sql, ad_campaigns.sql, add_canoe_category.sql, auto_create_profile.sql). Includes all tables, RLS policies, 56 lake seed rows, storage policies, handle_new_user trigger, and partner_inquiries. |
+| 2026-08-25 | Claude | Auth background: replaced CSS lake gradient animation in `(auth)/layout.tsx` with real Michigan sunset photo (`public/michigan-lake.jpg`). Removed blue background from forgot-password and reset-password pages. |
+| 2026-08-25 | Claude | Landing page full rewrite (`app/page.tsx`): multi-section site modeled on whitelake.org — sticky white navbar, full-viewport photo hero, about section (2-col + 4 stat tiles), 5 feature cards, lake directory (20 named pills), second CTA section, 4-column footer. |
+| 2026-08-25 | Claude | Partner connect flow: `/partners` page with hero, stats bar, 3 audience personas, 3 pricing tiers ($99/$149/$249), inquiry form (useActionState). `app/partners/actions.ts` server action inserts to `partner_inquiries`. Middleware updated to allow `/partners` without auth. |
+| 2026-08-25 | Claude | Bug fix: password reset email `redirect_to` was always `http://localhost:3000`. Root cause: `window.location.origin` fallback in forgot-password when `NEXT_PUBLIC_SITE_URL` is not baked. Fixed by hardcoding `https://mymichiganlake.com` as fallback. |
