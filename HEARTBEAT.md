@@ -1,6 +1,6 @@
 # MyMichiganLake — Project Heartbeat
 
-> Last updated: 2026-08-25 (multi-section landing page, partner connect flow, auth photo, callback fix)
+> Last updated: 2026-08-25 (owner roadmap added — WorkOS, Mapbox, HEIC, ReactBits, lake verification)
 > Verified state: ⚠️ TypeScript not re-run · ⚠️ Tests not re-run · ✅ All commits pushed to origin · ✅ Netlify live
 
 ---
@@ -146,6 +146,48 @@ CREATE POLICY "owner delete reaction" ON reactions FOR DELETE USING (auth.uid() 
 **Do not build until reviewed with a Michigan maritime attorney.**
 
 Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery permit, boating safety certificate proof, and signed liability waiver. Once reviewed: Buoy for per-trip insurance, Smartwaiver for digital waivers, Stripe for escrow.
+
+---
+
+## Owner Roadmap (2026-08-25 Reassessment)
+
+### 🔐 Authentication & Identity
+
+| Feature | Notes |
+|---|---|
+| **WorkOS Integration** | Migrate/implement WorkOS for enterprise-grade auth and user management |
+| **Lake Verification** | Verify authentic access, ownership, or physical proximity to a specific lake |
+| **Multiple Lakefront Owners** | Shared property profiles; multi-owner permissions per lakefront entry |
+
+### 🗺️ Maps & Spatial Features
+
+| Feature | Notes |
+|---|---|
+| **Mapbox Integration** | Replace current Leaflet/Carto setup with Mapbox for custom rendering and geospatial features |
+| **Interactive Lake Maps** | Dynamic map views: verified lakes, property boundaries, user locations |
+
+### 💬 Messaging & Feedback
+
+| Feature | Notes |
+|---|---|
+| **Live Messaging Updates** | Real-time data sync for instant delivery without page reloads (Supabase Realtime already partially in place) |
+| **Message Responses** | Structured reply/thread handling within messaging interface |
+| **MyMichiganLake Feedback** | Integrated in-app feedback loop for bug reports and feature suggestions |
+
+### 🎨 UI & Design Systems
+
+| Feature | Notes |
+|---|---|
+| **Framer Templates** | Framer component templates for accelerated page builds and UI consistency |
+| **React Bits Library** | Interactive UI components and micro-animations from [reactbits.dev](https://reactbits.dev/) |
+
+### 🛠️ Input Validation & Media Handling
+
+| Feature | Notes |
+|---|---|
+| **Apple HEIC Support** | Convert/render `.heic` uploads from iOS devices before storing |
+| **Asset Size Limits** | Enforce max file size on image uploads to control bandwidth and storage costs |
+| **Title Character Limits** | Enforce character length constraints on property, lake, and post titles for layout consistency |
 
 ---
 
