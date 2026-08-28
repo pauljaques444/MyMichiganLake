@@ -1,6 +1,6 @@
 # MyMichiganLake — Project Heartbeat
 
-> Last updated: 2026-08-25 (owner roadmap added — WorkOS, Mapbox, HEIC, ReactBits, lake verification)
+> Last updated: 2026-08-25 (open signup risk confirmed, Leaflet/Carto key expiry, lake perimeter polygons, identity verification)
 > Verified state: ⚠️ TypeScript not re-run · ⚠️ Tests not re-run · ✅ All commits pushed to origin · ✅ Netlify live
 
 ---
@@ -156,8 +156,9 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 | Feature | Notes |
 |---|---|
 | **WorkOS Integration** | Migrate/implement WorkOS for enterprise-grade auth and user management |
-| **Lake Verification** | Verify authentic access, ownership, or physical proximity to a specific lake |
-| **Multiple Lakefront Owners** | Shared property profiles; multi-owner permissions per lakefront entry |
+| **Identity Verification** | **CONFIRMED PROBLEM:** A Minnesota user signed up with no friction. Currently any email address can create an account with no proof of Michigan lake residency or ownership. Need address verification, property record check, or manual approval gating. |
+| **Lake Verification** | Verify authentic access, ownership, or physical proximity to a specific lake — tied to identity verification above |
+| **Multiple Lakefront Owners** | Support for shared property profiles and multi-owner account permissions per lakefront entry (e.g. a family cabin with 3 owners on different lakes) |
 
 ### 🗺️ Maps & Spatial Features
 
@@ -165,6 +166,7 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 |---|---|
 | **Mapbox Integration** | Replace current Leaflet/Carto setup with Mapbox for custom rendering and geospatial features |
 | **Interactive Lake Maps** | Dynamic map views: verified lakes, property boundaries, user locations |
+| **Lake Perimeter Outlines** | Replace circle-radius estimates with actual lake perimeter polygons. Current Leaflet circles are rough estimates — need GeoJSON polygon data (USGS NHD or Michigan GIS) and a map renderer that supports polygon layers. Mapbox GL JS supports this natively. |
 
 ### 💬 Messaging & Feedback
 
@@ -198,6 +200,8 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 | **Wrong Supabase project in env vars** | App was pointing at old project `kkygdfptjhclmlvamovi` instead of live project `yfborgjxrsfojjtsuoek`. Caused "JWT issued at future" errors on every DB query. Fixed 2026-08-08 by updating Netlify env vars. | If Supabase credentials ever change (key rotation, new project), update BOTH `.env.local` AND Netlify env vars. Always cross-check the `ref` slug in the anon key matches the project URL. |
 | **Two Supabase projects exist** | Old project `kkygdfptjhclmlvamovi` may still be active. Any dev who uses the old `.env.local` will silently connect to the wrong DB. | Keep `.env.local` pinned to `yfborgjxrsfojjtsuoek`. The old project should be deleted from the Supabase dashboard to prevent confusion. |
 | **No staging environment** | `.env.local` and Netlify both point to the same production Supabase project. Schema changes or bad data in dev can affect production. | Acceptable for now at this stage. Before scaling, create a separate Supabase project for local dev. |
+| **Open signup — no residency gate** | Any person anywhere can sign up with any email. A Minnesota user already signed up. Platform trust depends on the community being real Michigan lake residents. | Short-term: add a manual approval step or invite-only gate. Long-term: identity/address verification tied to property records. |
+| **Leaflet/Carto map tile API key expiring** | Current map is Leaflet + Carto Voyager tiles. Carto's free tier requires an API key that needs renewal; if it lapses the map goes blank. | Migrate to Mapbox GL JS (already on roadmap). GeoJSON lake polygons from USGS NHD replace circle estimates. |
 
 ---
 
