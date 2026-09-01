@@ -1,6 +1,6 @@
 # MyMichiganLake — Project Heartbeat
 
-> Last updated: 2026-08-25 (open signup risk confirmed, Leaflet/Carto key expiry, lake perimeter polygons, identity verification)
+> Last updated: 2026-08-25 (Mapbox GL JS + USGS NHD lake polygon outlines replace Leaflet/Carto)
 > Verified state: ⚠️ TypeScript not re-run · ⚠️ Tests not re-run · ✅ All commits pushed to origin · ✅ Netlify live
 
 ---
@@ -47,7 +47,7 @@ Key code: Supabase helpers in `frontend/lib/supabase/` (client, server, queries)
 | **Weather card** | ✅ Working | WeatherCard on feed accepts `lakeName` prop from feed page (no duplicate profile fetch). Falls back to self-fetching when used standalone. |
 | **Sponsored feed cards** | ✅ Working | Every 5th feed slot is a `SponsoredCard`. Targeted by `profiles.lake_id`; falls back to run-of-house. `ad_campaigns` + `ad_impressions` tables — run `supabase/ad_campaigns.sql`. |
 | **Safety alerts** | ✅ Working | Live NOAA NWS alerts scoped to user's county via `lake_id → lake.county → MIC{FIPS}`. Severity-coded cards (Extreme/Severe/Moderate/Minor). Local county opt-in signup card (OakAlert, CodeRED, Smart911, RAVE, B-WARN, Nixle). All 83 Michigan counties mapped in `lib/nws.ts`. |
-| **Interactive map** | ✅ Working / ⚠️ shallow links | Leaflet, Carto Voyager tiles. 56 lake markers — amber = home lake, bright blue = has listings, radius scales with count. Popup: lake name, county, up to 3 listing previews with emoji + price. Flies to home lake on load. **Missing:** popup listing items link to `/marketplace` (unfiltered) not to the specific listing detail page; no category filter on the map itself. |
+| **Interactive map** | ✅ Rebuilt / ⚠️ needs token | **Mapbox GL JS** (v3) + USGS NHD lake polygon outlines. Real lake perimeter shapes replace circle estimates. Home lake = amber outline, listing lakes = blue outline. Fallback circle markers for any lake NHD doesn't match by name. Polygon data fetched server-side from USGS NHD API (cached 24h). Requires `NEXT_PUBLIC_MAPBOX_TOKEN` env var in Netlify + `.env.local`. Popup unchanged: lake name, county, up to 3 listing previews. **Missing:** popup listing links still go to `/marketplace` (unfiltered). |
 | **Mobile nav** | ✅ Working | Hamburger menu `☰` in TopNav (visible below `md`). Slide-down drawer with all 6 nav links + Waterfront shortcuts + sign out. Closes on route change, outside tap, or backdrop click. Map container uses `isolation: isolate` to keep Leaflet's z-indices (200–800) from overlapping the `z-40` drawer. |
 | **Google AdSense** | ⚠️ Pending | Script is in server-rendered `<head>` (native `<script>`, not Next.js `<Script>`). Application submitted — awaiting Google approval. |
 | **Partner inquiries** | ✅ Working | `/partners` page with 3 pricing tiers ($99/$149/$249), inquiry form. `partner_inquiries` table + public INSERT RLS. Publicly accessible (no login). |
@@ -201,7 +201,7 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 | **Two Supabase projects exist** | Old project `kkygdfptjhclmlvamovi` may still be active. Any dev who uses the old `.env.local` will silently connect to the wrong DB. | Keep `.env.local` pinned to `yfborgjxrsfojjtsuoek`. The old project should be deleted from the Supabase dashboard to prevent confusion. |
 | **No staging environment** | `.env.local` and Netlify both point to the same production Supabase project. Schema changes or bad data in dev can affect production. | Acceptable for now at this stage. Before scaling, create a separate Supabase project for local dev. |
 | **Open signup — no residency gate** | Any person anywhere can sign up with any email. A Minnesota user already signed up. Platform trust depends on the community being real Michigan lake residents. | Short-term: add a manual approval step or invite-only gate. Long-term: identity/address verification tied to property records. |
-| **Leaflet/Carto map tile API key expiring** | Current map is Leaflet + Carto Voyager tiles. Carto's free tier requires an API key that needs renewal; if it lapses the map goes blank. | Migrate to Mapbox GL JS (already on roadmap). GeoJSON lake polygons from USGS NHD replace circle estimates. |
+| **Mapbox token not yet set** | Map shows a fallback "token not configured" state until `NEXT_PUBLIC_MAPBOX_TOKEN` is added to Netlify env vars and site is redeployed. Leaflet/Carto is removed. | Add Mapbox token from mapbox.com → Access Tokens. Add to `.env.local` AND Netlify env vars. Redeploy. |
 
 ---
 
@@ -251,3 +251,4 @@ Michigan MCL 324.44501–44526 (boat livery laws) requires a registered livery p
 | 2026-08-25 | Claude | Landing page full rewrite (`app/page.tsx`): multi-section site modeled on whitelake.org — sticky white navbar, full-viewport photo hero, about section (2-col + 4 stat tiles), 5 feature cards, lake directory (20 named pills), second CTA section, 4-column footer. |
 | 2026-08-25 | Claude | Partner connect flow: `/partners` page with hero, stats bar, 3 audience personas, 3 pricing tiers ($99/$149/$249), inquiry form (useActionState). `app/partners/actions.ts` server action inserts to `partner_inquiries`. Middleware updated to allow `/partners` without auth. |
 | 2026-08-25 | Claude | Bug fix: password reset email `redirect_to` was always `http://localhost:3000`. Root cause: `window.location.origin` fallback in forgot-password when `NEXT_PUBLIC_SITE_URL` is not baked. Fixed by hardcoding `https://mymichiganlake.com` as fallback. |
+| 2026-08-25 | Claude | Map overhaul: replaced Leaflet/Carto with Mapbox GL JS v3. `lib/nhd.ts` fetches real lake polygon GeoJSON from USGS NHD API (server-side, cached 24h). Map renders actual lake perimeter outlines as fill + outline layers. Fallback circle markers for any lake NHD doesn't match. Requires `NEXT_PUBLIC_MAPBOX_TOKEN`. TypeScript clean. |

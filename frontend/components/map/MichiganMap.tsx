@@ -2,11 +2,13 @@
 
 import dynamic from 'next/dynamic'
 import type { MapLake, MapListing } from './MapInner'
+import type { LakePolygonCollection } from '@/lib/nhd'
 
 interface Props {
   lakes: MapLake[]
   listings: MapListing[]
   userLakeId: string | null
+  polygons: LakePolygonCollection | null
 }
 
 const MapInner = dynamic(() => import('./MapInner'), {

@@ -1,8 +1,9 @@
 'use client'
 
-import 'leaflet/dist/leaflet.css'
+import mapboxgl from 'mapbox-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef } from 'react'
-import type { Map as LeafletMap } from 'leaflet'
+import type { LakePolygonCollection } from '@/lib/nhd'
 
 export type MapLake = {
   id: string
@@ -25,6 +26,7 @@ interface Props {
   lakes: MapLake[]
   listings: MapListing[]
   userLakeId: string | null
+  polygons: LakePolygonCollection | null
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -34,28 +36,31 @@ const CATEGORY_EMOJI: Record<string, string> = {
 
 function formatPrice(price: number | null, priceType: string): string {
   if (!price) return 'Free'
-  const formatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price)
-  if (priceType === 'rent_day') return `${formatted}/day`
-  if (priceType === 'rent_hour') return `${formatted}/hr`
-  return formatted
+  const f = new Intl.NumberFormat('en-US', {
+    style: 'currency', currency: 'USD', maximumFractionDigits: 0,
+  }).format(price)
+  if (priceType === 'rent_day') return `${f}/day`
+  if (priceType === 'rent_hour') return `${f}/hr`
+  return f
 }
 
-function buildPopupHtml(lake: MapLake, lakeListings: MapListing[], isHome: boolean): string {
+function buildPopupHtml(
+  lake: MapLake,
+  lakeListings: MapListing[],
+  isHome: boolean,
+): string {
   const header = `
-    <div style="font-family:system-ui,sans-serif;min-width:190px;max-width:240px">
+    <div style="font-family:system-ui,sans-serif;padding:12px 14px 4px;min-width:190px;max-width:240px">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
         ${isHome ? '<span>🏠</span>' : ''}
         <strong style="font-size:14px;color:#0f172a">${lake.name}</strong>
       </div>
-      ${lake.county ? `<div style="font-size:11px;color:#64748b;margin-bottom:10px">${lake.county} County</div>` : ''}
+      ${lake.county ? `<div style="font-size:11px;color:#64748b;margin-bottom:8px">${lake.county} County</div>` : ''}
   `
-
-  if (lakeListings.length === 0) {
-    return header + `<div style="font-size:12px;color:#94a3b8">No active listings</div></div>`
+  if (!lakeListings.length) {
+    return header + `<div style="font-size:12px;color:#94a3b8;padding-bottom:10px">No active listings</div></div>`
   }
-
-  const top3 = lakeListings.slice(0, 3)
-  const items = top3.map(l => `
+  const items = lakeListings.slice(0, 3).map(l => `
     <a href="/marketplace" style="display:flex;align-items:center;gap:7px;padding:5px 0;text-decoration:none;border-bottom:1px solid #f1f5f9">
       <span style="font-size:15px">${CATEGORY_EMOJI[l.category] ?? '📦'}</span>
       <div style="flex:1;min-width:0">
@@ -64,90 +69,162 @@ function buildPopupHtml(lake: MapLake, lakeListings: MapListing[], isHome: boole
       </div>
     </a>
   `).join('')
-
-  const seeAll = lakeListings.length > 3
-    ? `<a href="/marketplace" style="display:block;margin-top:8px;font-size:11px;font-weight:600;color:#0369a1;text-decoration:none">See all ${lakeListings.length} listings →</a>`
-    : `<a href="/marketplace" style="display:block;margin-top:8px;font-size:11px;font-weight:600;color:#0369a1;text-decoration:none">View marketplace →</a>`
-
-  return header + `
-    <div style="font-size:11px;color:#374151;margin-bottom:6px;font-weight:600">
-      ${lakeListings.length} active listing${lakeListings.length !== 1 ? 's' : ''}
-    </div>
-    ${items}
-    ${seeAll}
-  </div>`
+  const footer = lakeListings.length > 3
+    ? `<a href="/marketplace" style="display:block;margin-top:8px;padding-bottom:10px;font-size:11px;font-weight:600;color:#0369a1;text-decoration:none">See all ${lakeListings.length} listings →</a>`
+    : `<a href="/marketplace" style="display:block;margin-top:8px;padding-bottom:10px;font-size:11px;font-weight:600;color:#0369a1;text-decoration:none">View marketplace →</a>`
+  return header +
+    `<div style="font-size:11px;color:#374151;margin-bottom:6px;font-weight:600">${lakeListings.length} listing${lakeListings.length !== 1 ? 's' : ''}</div>` +
+    items + footer + '</div>'
 }
 
-export default function MapInner({ lakes, listings, userLakeId }: Props) {
+export default function MapInner({ lakes, listings, userLakeId, polygons }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<LeafletMap | null>(null)
+  const mapRef = useRef<mapboxgl.Map | null>(null)
+
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
 
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return
+    if (!containerRef.current || mapRef.current || !token) return
 
-    // Group listings by lake name
+    mapboxgl.accessToken = token
+
     const listingsByLake: Record<string, MapListing[]> = {}
     for (const l of listings) {
       if (!l.lake_name) continue
-      listingsByLake[l.lake_name] ??= []
-      listingsByLake[l.lake_name].push(l)
+      ;(listingsByLake[l.lake_name] ??= []).push(l)
     }
 
-    import('leaflet').then((L) => {
-      // Leaflet default icon fix (webpack mangles the asset URLs)
-      // We use circleMarker so this doesn't matter, but fix it anyway
-      // in case any plugin uses default markers.
+    const coveredIds = new Set(
+      polygons?.features.map(f => f.properties?.lake_id as string) ?? []
+    )
 
-      const map = L.map(containerRef.current!, {
-        zoomControl: true,
-        attributionControl: true,
-      })
-      mapRef.current = map
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: 'mapbox://styles/mapbox/outdoors-v12',
+      bounds: [[-90.4, 41.7], [-82.4, 47.5]],
+      fitBoundsOptions: { padding: 48 },
+    })
+    mapRef.current = map
 
-      // Fit Michigan
-      map.fitBounds([[41.7, -90.4], [47.5, -82.4]], { padding: [24, 24] })
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right')
 
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-        {
-          attribution: '&copy; <a href="https://carto.com/">Carto</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-          subdomains: 'abcd',
-          maxZoom: 19,
+    map.on('load', () => {
+      // ── Lake polygon layers ──────────────────────────────────────
+      if (polygons && polygons.features.length > 0) {
+        // Enrich with derived properties for paint expressions
+        const enriched = {
+          ...polygons,
+          features: polygons.features.map(f => ({
+            ...f,
+            properties: {
+              ...f.properties,
+              listing_count: (listingsByLake[f.properties?.lake_name as string] ?? []).length,
+              is_home: f.properties?.lake_id === userLakeId ? 1 : 0,
+            },
+          })),
         }
-      ).addTo(map)
 
-      for (const lake of lakes) {
-        const isHome = lake.id === userLakeId
-        const lakeListings = listingsByLake[lake.name] ?? []
-        const count = lakeListings.length
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        map.addSource('lakes', { type: 'geojson', data: enriched as any })
 
-        const radius = isHome ? 13 : count > 5 ? 11 : count > 0 ? 9 : 7
-        const color = isHome ? '#d97706' : '#0369a1'
-        const fillColor = isHome ? '#fbbf24' : count > 0 ? '#0ea5e9' : '#7dd3fc'
-
-        const marker = L.circleMarker([lake.lat, lake.lng], {
-          radius,
-          color,
-          fillColor,
-          fillOpacity: 0.8,
-          weight: isHome ? 3 : 1.5,
+        map.addLayer({
+          id: 'lake-fill',
+          type: 'fill',
+          source: 'lakes',
+          paint: {
+            'fill-color': [
+              'case',
+              ['==', ['get', 'is_home'], 1], '#fde68a',
+              ['>', ['get', 'listing_count'], 0], '#bae6fd',
+              '#dbeafe',
+            ],
+            'fill-opacity': [
+              'case',
+              ['==', ['get', 'is_home'], 1], 0.60,
+              0.40,
+            ],
+          },
         })
 
-        marker.bindPopup(buildPopupHtml(lake, lakeListings, isHome), {
-          maxWidth: 260,
-          className: 'mml-popup',
+        map.addLayer({
+          id: 'lake-outline',
+          type: 'line',
+          source: 'lakes',
+          paint: {
+            'line-color': [
+              'case',
+              ['==', ['get', 'is_home'], 1], '#d97706',
+              ['>', ['get', 'listing_count'], 0], '#0369a1',
+              '#93c5fd',
+            ],
+            'line-width': [
+              'case',
+              ['==', ['get', 'is_home'], 1], 3,
+              ['>', ['get', 'listing_count'], 0], 2,
+              1,
+            ],
+          },
         })
 
-        marker.addTo(map)
+        // Popup on polygon click
+        map.on('click', 'lake-fill', e => {
+          if (!e.features?.length) return
+          const props = e.features[0].properties
+          const lake = lakes.find(l => l.id === props?.lake_id)
+          if (!lake) return
+          const html = buildPopupHtml(
+            lake,
+            listingsByLake[lake.name] ?? [],
+            lake.id === userLakeId,
+          )
+          new mapboxgl.Popup({ maxWidth: '280px', className: 'mml-popup' })
+            .setLngLat(e.lngLat)
+            .setHTML(html)
+            .addTo(map)
+        })
+
+        map.on('mouseenter', 'lake-fill', () => {
+          map.getCanvas().style.cursor = 'pointer'
+        })
+        map.on('mouseleave', 'lake-fill', () => {
+          map.getCanvas().style.cursor = ''
+        })
       }
 
-      // Fly to user's lake after tiles load
+      // ── Fallback circle markers for lakes without polygon data ──
+      for (const lake of lakes) {
+        if (coveredIds.has(lake.id)) continue
+        const isHome = lake.id === userLakeId
+        const lakeListings = listingsByLake[lake.name] ?? []
+        const hasListings = lakeListings.length > 0
+
+        const el = document.createElement('div')
+        const size = isHome ? 16 : hasListings ? 12 : 9
+        Object.assign(el.style, {
+          width: `${size}px`,
+          height: `${size}px`,
+          borderRadius: '50%',
+          background: isHome ? '#fbbf24' : hasListings ? '#0ea5e9' : '#7dd3fc',
+          border: `${isHome ? 3 : 1.5}px solid ${isHome ? '#d97706' : '#0369a1'}`,
+          cursor: 'pointer',
+        })
+
+        new mapboxgl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([lake.lng, lake.lat])
+          .setPopup(
+            new mapboxgl.Popup({ maxWidth: '280px', className: 'mml-popup' })
+              .setHTML(buildPopupHtml(lake, lakeListings, isHome))
+          )
+          .addTo(map)
+      }
+
+      // ── Fly to home lake ─────────────────────────────────────────
       if (userLakeId) {
         const home = lakes.find(l => l.id === userLakeId)
         if (home) {
-          map.once('load', () => map.flyTo([home.lat, home.lng], 11, { duration: 1.2 }))
-          // also trigger immediately in case tiles already loaded
-          setTimeout(() => map.flyTo([home.lat, home.lng], 11, { duration: 1.2 }), 300)
+          setTimeout(() => {
+            map.flyTo({ center: [home.lng, home.lat], zoom: 11, duration: 1500 })
+          }, 500)
         }
       }
     })
@@ -156,11 +233,21 @@ export default function MapInner({ lakes, listings, userLakeId }: Props) {
       mapRef.current?.remove()
       mapRef.current = null
     }
-  // Run once on mount — lakes/listings/userLakeId are server-fetched and stable
+  // Stable server props — run once on mount
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
-  )
+  if (!token) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-50">
+        <div className="text-center text-gray-400 space-y-2">
+          <div className="text-4xl">🗺️</div>
+          <p className="text-sm font-medium">Map unavailable</p>
+          <p className="text-xs">Add NEXT_PUBLIC_MAPBOX_TOKEN to enable the map</p>
+        </div>
+      </div>
+    )
+  }
+
+  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 }
